@@ -10,6 +10,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import UsersPage from './pages/admin/UsersPage';
 import ModelsPage from './pages/admin/ModelsPage';
 import CliProxyPage from './pages/admin/CliProxyPage';
+import SettingsPage from './pages/admin/SettingsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -85,6 +86,14 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <CliProxyPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/settings"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <SettingsPage />
             </ProtectedRoute>
           }
         />

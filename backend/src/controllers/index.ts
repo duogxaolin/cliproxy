@@ -4,4 +4,5 @@ export { proxyController, ProxyController } from './proxy.controller';
 export { apiKeyController, ApiKeyController } from './apiKey.controller';
 export { creditController, CreditController } from './credit.controller';
 export { adminController, AdminController } from './admin.controller';
+export { settingsController } from './settings.controller';
 

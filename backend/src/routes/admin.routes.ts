@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { shadowModelController } from '../controllers/shadowModel.controller';
 import { adminController } from '../controllers/admin.controller';
+import { settingsController } from '../controllers';
 import { authenticateJWT, requireRole } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -51,6 +52,16 @@ router.put('/models/:id', (req, res) => shadowModelController.updateModel(req, r
 
 // DELETE /api/admin/models/:id - Delete model (soft delete)
 router.delete('/models/:id', (req, res) => shadowModelController.deleteModel(req, res));
+
+// ===========================================
+// Settings Management Routes
+// ===========================================
+router.get('/settings', settingsController.getSettings.bind(settingsController));
+router.get('/settings/:key', settingsController.getSetting.bind(settingsController));
+router.post('/settings', settingsController.createSetting.bind(settingsController));
+router.post('/settings/bulk', settingsController.bulkUpsertSettings.bind(settingsController));
+router.put('/settings/:key', settingsController.updateSetting.bind(settingsController));
+router.delete('/settings/:key', settingsController.deleteSetting.bind(settingsController));
 
 export default router;
 

@@ -105,6 +105,35 @@ export interface UpdateModelData {
   is_active?: boolean;
 }
 
+export interface SystemSetting {
+  id: string;
+  key: string;
+  value: string;
+  category: 'environment' | 'connection' | 'system';
+  dataType: 'string' | 'number' | 'boolean' | 'json';
+  isSecret: boolean;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateSettingInput {
+  key: string;
+  value: string;
+  category: 'environment' | 'connection' | 'system';
+  dataType?: 'string' | 'number' | 'boolean' | 'json';
+  isSecret?: boolean;
+  description?: string;
+}
+
+export interface UpdateSettingInput {
+  value?: string;
+  category?: 'environment' | 'connection' | 'system';
+  dataType?: 'string' | 'number' | 'boolean' | 'json';
+  isSecret?: boolean;
+  description?: string;
+}
+
 export const adminService = {
   // Stats
   async getStats(): Promise<PlatformStats> {
@@ -180,6 +209,38 @@ export const adminService = {
 
   async deleteModel(id: string): Promise<void> {
     await api.delete(`/api/admin/models/${id}`);
+  },
+
+  // Settings Management
+  async getSettings(category?: string): Promise<{ data: SystemSetting[]; total: number }> {
+    const params = category ? `?category=${category}` : '';
+    const response = await api.get(`/admin/settings${params}`);
+    return response.data;
+  },
+
+  async getSetting(key: string): Promise<{ data: SystemSetting }> {
+    const response = await api.get(`/admin/settings/${encodeURIComponent(key)}`);
+    return response.data;
+  },
+
+  async createSetting(data: CreateSettingInput): Promise<{ message: string; data: SystemSetting }> {
+    const response = await api.post('/admin/settings', data);
+    return response.data;
+  },
+
+  async updateSetting(key: string, data: UpdateSettingInput): Promise<{ message: string; data: SystemSetting }> {
+    const response = await api.put(`/admin/settings/${encodeURIComponent(key)}`, data);
+    return response.data;
+  },
+
+  async deleteSetting(key: string): Promise<{ message: string }> {
+    const response = await api.delete(`/admin/settings/${encodeURIComponent(key)}`);
+    return response.data;
+  },
+
+  async bulkUpsertSettings(settings: CreateSettingInput[]): Promise<{ message: string; data: SystemSetting[] }> {
+    const response = await api.post('/admin/settings/bulk', { settings });
+    return response.data;
   },
 };
 
