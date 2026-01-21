@@ -3,6 +3,7 @@ import { PaginationParams } from '../types';
 export { hashPassword, verifyPassword } from './password';
 export { generateToken, verifyToken, generateRefreshToken, verifyRefreshToken } from './jwt';
 export { generateApiKey, hashApiKey, verifyApiKey } from './apiKey';
+export { encrypt, decrypt } from './encryption';
 export { default as prisma } from './prisma';
 
 export function getPaginationParams(query: { page?: string; limit?: string }): PaginationParams {

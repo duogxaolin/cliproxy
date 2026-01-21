@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { proxyService } from '../services/proxy.service';
+import { usageService } from '../services/usage.service';
 import { ApiKeyAuthenticatedRequest } from '../types';
 
 export class ProxyController {
@@ -79,6 +80,9 @@ export class ProxyController {
     model: string,
     ipAddress?: string
   ): Promise<void> {
+    // Set rate limit headers before processing
+    await this.setRateLimitHeaders(res, req.apiKey!.keyId);
+
     const result = await proxyService.proxyRequest({
       userId: req.apiKey!.userId,
       apiKeyId: req.apiKey!.keyId,
@@ -97,6 +101,9 @@ export class ProxyController {
     model: string,
     ipAddress?: string
   ): Promise<void> {
+    // Set rate limit headers before processing
+    await this.setRateLimitHeaders(res, req.apiKey!.keyId);
+
     // Set headers for SSE
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -127,6 +134,23 @@ export class ProxyController {
         },
       }
     );
+  }
+
+  private async setRateLimitHeaders(res: Response, apiKeyId: string): Promise<void> {
+    const quota = await usageService.checkQuota(apiKeyId);
+
+    // If no quota limit, use a high default for the header
+    const limit = quota.quotaLimit ?? 0;
+    const remaining = limit > 0 ? Math.max(0, limit - quota.quotaUsed) : 0;
+
+    // Reset time: end of current day (UTC)
+    const now = new Date();
+    const resetTime = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+    const resetTimestamp = Math.floor(resetTime.getTime() / 1000);
+
+    res.setHeader('X-RateLimit-Limit', limit.toString());
+    res.setHeader('X-RateLimit-Remaining', remaining.toString());
+    res.setHeader('X-RateLimit-Reset', resetTimestamp.toString());
   }
 
   private handleProxyError(error: unknown, res: Response): void {

@@ -1,5 +1,6 @@
 import { ShadowModel } from '@prisma/client';
 import prisma from '../utils/prisma';
+import { encrypt, decrypt } from '../utils/encryption';
 
 export interface CreateShadowModelData {
   displayName: string;
@@ -43,7 +44,7 @@ export class ShadowModelService {
       data: {
         displayName: data.displayName,
         providerBaseUrl: data.providerBaseUrl,
-        providerToken: data.providerToken,
+        providerToken: encrypt(data.providerToken),
         providerModel: data.providerModel,
         pricingInput: data.pricingInput,
         pricingOutput: data.pricingOutput,
@@ -81,9 +82,15 @@ export class ShadowModelService {
       }
     }
 
+    // Encrypt provider token if being updated
+    const updateData = { ...data };
+    if (updateData.providerToken) {
+      updateData.providerToken = encrypt(updateData.providerToken);
+    }
+
     return prisma.shadowModel.update({
       where: { id },
-      data,
+      data: updateData,
     });
   }
 
@@ -104,28 +111,39 @@ export class ShadowModelService {
   }
 
   async getModel(id: string): Promise<ShadowModel | null> {
-    return prisma.shadowModel.findUnique({
+    const model = await prisma.shadowModel.findUnique({
       where: { id },
     });
+    return model ? this.decryptModelToken(model) : null;
   }
 
   async getModelByDisplayName(displayName: string): Promise<ShadowModel | null> {
-    return prisma.shadowModel.findUnique({
+    const model = await prisma.shadowModel.findUnique({
       where: { displayName },
     });
+    return model ? this.decryptModelToken(model) : null;
   }
 
   async getAllModels(): Promise<ShadowModel[]> {
-    return prisma.shadowModel.findMany({
+    const models = await prisma.shadowModel.findMany({
       orderBy: { createdAt: 'desc' },
     });
+    return models.map(model => this.decryptModelToken(model));
   }
 
   async getActiveModels(): Promise<ShadowModel[]> {
-    return prisma.shadowModel.findMany({
+    const models = await prisma.shadowModel.findMany({
       where: { isActive: true },
       orderBy: { displayName: 'asc' },
     });
+    return models.map(model => this.decryptModelToken(model));
+  }
+
+  private decryptModelToken(model: ShadowModel): ShadowModel {
+    return {
+      ...model,
+      providerToken: decrypt(model.providerToken),
+    };
   }
 }
 
