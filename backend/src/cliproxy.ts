@@ -11,7 +11,23 @@ const app = express();
 const PORT = process.env.CLI_PROXY_PORT || 4569;
 
 // Middleware
-app.use(helmet());
+// Configure helmet to allow iframe embedding from any origin
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "*"],
+      frameSrc: ["'self'"],
+      frameAncestors: ["*"], // Allow embedding in iframe from any origin
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+}));
 app.use(cors({
   origin: '*', // Allow all origins for CLI usage
   credentials: true,
