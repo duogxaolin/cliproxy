@@ -214,32 +214,32 @@ export const adminService = {
   // Settings Management
   async getSettings(category?: string): Promise<{ data: SystemSetting[]; total: number }> {
     const params = category ? `?category=${category}` : '';
-    const response = await api.get(`/admin/settings${params}`);
+    const response = await api.get(`/api/admin/settings${params}`);
     return response.data;
   },
 
   async getSetting(key: string): Promise<{ data: SystemSetting }> {
-    const response = await api.get(`/admin/settings/${encodeURIComponent(key)}`);
+    const response = await api.get(`/api/admin/settings/${encodeURIComponent(key)}`);
     return response.data;
   },
 
   async createSetting(data: CreateSettingInput): Promise<{ message: string; data: SystemSetting }> {
-    const response = await api.post('/admin/settings', data);
+    const response = await api.post('/api/admin/settings', data);
     return response.data;
   },
 
   async updateSetting(key: string, data: UpdateSettingInput): Promise<{ message: string; data: SystemSetting }> {
-    const response = await api.put(`/admin/settings/${encodeURIComponent(key)}`, data);
+    const response = await api.put(`/api/admin/settings/${encodeURIComponent(key)}`, data);
     return response.data;
   },
 
   async deleteSetting(key: string): Promise<{ message: string }> {
-    const response = await api.delete(`/admin/settings/${encodeURIComponent(key)}`);
+    const response = await api.delete(`/api/admin/settings/${encodeURIComponent(key)}`);
     return response.data;
   },
 
   async bulkUpsertSettings(settings: CreateSettingInput[]): Promise<{ message: string; data: SystemSetting[] }> {
-    const response = await api.post('/admin/settings/bulk', { settings });
+    const response = await api.post('/api/admin/settings/bulk', { settings });
     return response.data;
   },
 };
