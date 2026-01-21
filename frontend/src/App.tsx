@@ -5,6 +5,11 @@ import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
 import ApiKeysPage from './pages/ApiKeysPage';
 import CreditsPage from './pages/CreditsPage';
+import UsagePage from './pages/UsagePage';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import UsersPage from './pages/admin/UsersPage';
+import ModelsPage from './pages/admin/ModelsPage';
+import CliProxyPage from './pages/admin/CliProxyPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -41,9 +46,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/usage"
+          element={
+            <ProtectedRoute>
+              <UsagePage />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Protected admin routes - placeholder for Phase 3 */}
-        {/*
+        {/* Protected admin routes */}
         <Route
           path="/admin"
           element={
@@ -52,7 +64,30 @@ function App() {
             </ProtectedRoute>
           }
         />
-        */}
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <UsersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/models"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <ModelsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/cliproxy"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <CliProxyPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   );

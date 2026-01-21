@@ -3,21 +3,25 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { creditService } from '../services/creditService';
 import { apiKeyService } from '../services/apiKeyService';
+import { usageService } from '../services/usageService';
 
 export default function Dashboard() {
   const [balance, setBalance] = useState<number>(0);
   const [apiKeyCount, setApiKeyCount] = useState<number>(0);
+  const [totalRequests, setTotalRequests] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [credits, apiKeys] = await Promise.all([
+        const [credits, apiKeys, usage] = await Promise.all([
           creditService.getCredits(),
           apiKeyService.getApiKeys(),
+          usageService.getUsageSummary(),
         ]);
         setBalance(credits.balance);
         setApiKeyCount(apiKeys.length);
+        setTotalRequests(usage.total_requests);
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
       } finally {
@@ -99,13 +103,17 @@ export default function Dashboard() {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Total Requests</dt>
-                    <dd className="text-lg font-semibold text-gray-900">0</dd>
+                    <dd className="text-lg font-semibold text-gray-900">
+                      {loading ? '...' : totalRequests.toLocaleString()}
+                    </dd>
                   </dl>
                 </div>
               </div>
             </div>
             <div className="bg-gray-50 px-5 py-3">
-              <span className="text-sm font-medium text-gray-400">Coming soon</span>
+              <Link to="/usage" className="text-sm font-medium text-blue-600 hover:text-blue-800">
+                View analytics →
+              </Link>
             </div>
           </div>
         </div>
@@ -119,6 +127,12 @@ export default function Dashboard() {
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
               Create API Key
+            </Link>
+            <Link
+              to="/usage"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              View Usage
             </Link>
             <Link
               to="/credits"

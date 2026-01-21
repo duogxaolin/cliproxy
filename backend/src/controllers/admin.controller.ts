@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../types';
 import { creditService } from '../services/credit.service';
+import { usageService, GroupBy } from '../services/usage.service';
 import prisma from '../utils/prisma';
 
 export class AdminController {
@@ -11,10 +12,17 @@ export class AdminController {
       const offset = (page - 1) * limit;
       const status = req.query.status as string | undefined;
       const role = req.query.role as string | undefined;
+      const search = req.query.search as string | undefined;
 
       const where: Record<string, unknown> = {};
       if (status) where.status = status;
       if (role) where.role = role;
+      if (search) {
+        where.OR = [
+          { email: { contains: search, mode: 'insensitive' } },
+          { username: { contains: search, mode: 'insensitive' } },
+        ];
+      }
 
       const [users, total] = await Promise.all([
         prisma.user.findMany({
@@ -181,6 +189,37 @@ export class AdminController {
     }
   }
 
+  async updateUserStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      if (!status || !['active', 'suspended'].includes(status)) {
+        res.status(400).json({ error: 'Status must be active or suspended' });
+        return;
+      }
+
+      const user = await prisma.user.update({
+        where: { id },
+        data: { status },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          status: true,
+        },
+      });
+
+      res.json({
+        message: `User ${status === 'suspended' ? 'suspended' : 'activated'} successfully`,
+        user,
+      });
+    } catch (error) {
+      console.error('Update user status error:', error);
+      res.status(500).json({ error: 'Failed to update user status' });
+    }
+  }
+
   async getStats(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const now = new Date();
@@ -219,6 +258,61 @@ export class AdminController {
     } catch (error) {
       console.error('Get stats error:', error);
       res.status(500).json({ error: 'Failed to get stats' });
+    }
+  }
+
+  // Analytics endpoints
+  async getAnalytics(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { start_date, end_date, group_by } = req.query;
+
+      const startDate = start_date ? new Date(start_date as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const endDate = end_date ? new Date(end_date as string) : new Date();
+      const groupBy = (group_by as GroupBy) || 'day';
+
+      const [summary, trends] = await Promise.all([
+        usageService.getPlatformAnalytics(startDate, endDate),
+        usageService.getUsageTrends(startDate, endDate, groupBy),
+      ]);
+
+      res.json({
+        summary,
+        trends,
+      });
+    } catch (error) {
+      console.error('Get analytics error:', error);
+      res.status(500).json({ error: 'Failed to get analytics' });
+    }
+  }
+
+  async getAnalyticsByUser(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { start_date, end_date, limit } = req.query;
+
+      const startDate = start_date ? new Date(start_date as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const endDate = end_date ? new Date(end_date as string) : new Date();
+      const limitNum = Math.min(parseInt(limit as string) || 10, 100);
+
+      const data = await usageService.getAnalyticsByUser(startDate, endDate, limitNum);
+      res.json({ data });
+    } catch (error) {
+      console.error('Get analytics by user error:', error);
+      res.status(500).json({ error: 'Failed to get analytics by user' });
+    }
+  }
+
+  async getAnalyticsByModel(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { start_date, end_date } = req.query;
+
+      const startDate = start_date ? new Date(start_date as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const endDate = end_date ? new Date(end_date as string) : new Date();
+
+      const data = await usageService.getAnalyticsByModel(startDate, endDate);
+      res.json({ data });
+    } catch (error) {
+      console.error('Get analytics by model error:', error);
+      res.status(500).json({ error: 'Failed to get analytics by model' });
     }
   }
 }

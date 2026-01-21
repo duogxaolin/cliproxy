@@ -37,6 +37,9 @@ export default function Navbar() {
               <Link to="/credits" className={linkClass('/credits')}>
                 Credits
               </Link>
+              <Link to="/usage" className={linkClass('/usage')}>
+                Usage
+              </Link>
               {user?.role === 'admin' && (
                 <>
                   <div className="border-l border-gray-200 mx-2" />
@@ -48,6 +51,9 @@ export default function Navbar() {
                   </Link>
                   <Link to="/admin/models" className={linkClass('/admin/models')}>
                     Models
+                  </Link>
+                  <Link to="/admin/cliproxy" className={linkClass('/admin/cliproxy')}>
+                    CLI Proxy
                   </Link>
                 </>
               )}

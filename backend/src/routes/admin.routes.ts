@@ -13,6 +13,16 @@ router.use(requireRole('admin'));
 // GET /api/admin/stats - Get platform statistics
 router.get('/stats', (req, res) => adminController.getStats(req, res));
 
+// Analytics Endpoints
+// GET /api/admin/analytics - Platform-wide analytics
+router.get('/analytics', (req, res) => adminController.getAnalytics(req, res));
+
+// GET /api/admin/analytics/by-user - Usage by user
+router.get('/analytics/by-user', (req, res) => adminController.getAnalyticsByUser(req, res));
+
+// GET /api/admin/analytics/by-model - Usage by model
+router.get('/analytics/by-model', (req, res) => adminController.getAnalyticsByModel(req, res));
+
 // User Management
 // GET /api/admin/users - List all users with credits
 router.get('/users', (req, res) => adminController.getUsers(req, res));
@@ -22,6 +32,9 @@ router.get('/users/:id', (req, res) => adminController.getUser(req, res));
 
 // POST /api/admin/users/:id/credits - Grant credits to user
 router.post('/users/:id/credits', (req, res) => adminController.grantCredits(req, res));
+
+// PATCH /api/admin/users/:id/status - Update user status (suspend/activate)
+router.patch('/users/:id/status', (req, res) => adminController.updateUserStatus(req, res));
 
 // Shadow Model Management
 // GET /api/admin/models - List all models
