@@ -3,6 +3,8 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
+import ApiKeysPage from './pages/ApiKeysPage';
+import CreditsPage from './pages/CreditsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -20,6 +22,22 @@ function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/api-keys"
+          element={
+            <ProtectedRoute>
+              <ApiKeysPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/credits"
+          element={
+            <ProtectedRoute>
+              <CreditsPage />
             </ProtectedRoute>
           }
         />

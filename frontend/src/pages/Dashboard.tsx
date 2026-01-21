@@ -1,42 +1,35 @@
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import { creditService } from '../services/creditService';
+import { apiKeyService } from '../services/apiKeyService';
 
 export default function Dashboard() {
-  const { user, logout } = useAuthStore();
-  const navigate = useNavigate();
+  const [balance, setBalance] = useState<number>(0);
+  const [apiKeyCount, setApiKeyCount] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [credits, apiKeys] = await Promise.all([
+          creditService.getCredits(),
+          apiKeyService.getApiKeys(),
+        ]);
+        setBalance(credits.balance);
+        setApiKeyCount(apiKeys.length);
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-gray-900">API Marketplace</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                Welcome, {user?.username || 'User'}
-                {user?.role === 'admin' && (
-                  <span className="ml-2 px-2 py-0.5 text-xs bg-primary-100 text-primary-800 rounded-full">
-                    Admin
-                  </span>
-                )}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="text-gray-600 hover:text-gray-900 text-sm font-medium"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h2>
@@ -54,10 +47,17 @@ export default function Dashboard() {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Credit Balance</dt>
-                    <dd className="text-lg font-semibold text-gray-900">$0.00</dd>
+                    <dd className="text-lg font-semibold text-gray-900">
+                      {loading ? '...' : `$${balance.toFixed(4)}`}
+                    </dd>
                   </dl>
                 </div>
               </div>
+            </div>
+            <div className="bg-gray-50 px-5 py-3">
+              <Link to="/credits" className="text-sm font-medium text-blue-600 hover:text-blue-800">
+                View details →
+              </Link>
             </div>
           </div>
 
@@ -73,10 +73,17 @@ export default function Dashboard() {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Active API Keys</dt>
-                    <dd className="text-lg font-semibold text-gray-900">0</dd>
+                    <dd className="text-lg font-semibold text-gray-900">
+                      {loading ? '...' : apiKeyCount}
+                    </dd>
                   </dl>
                 </div>
               </div>
+            </div>
+            <div className="bg-gray-50 px-5 py-3">
+              <Link to="/api-keys" className="text-sm font-medium text-blue-600 hover:text-blue-800">
+                Manage keys →
+              </Link>
             </div>
           </div>
 
@@ -97,6 +104,9 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+            <div className="bg-gray-50 px-5 py-3">
+              <span className="text-sm font-medium text-gray-400">Coming soon</span>
+            </div>
           </div>
         </div>
 
@@ -104,12 +114,18 @@ export default function Dashboard() {
         <div className="mt-8">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
           <div className="flex space-x-4">
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">
+            <Link
+              to="/api-keys"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            >
               Create API Key
-            </button>
-            <button className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-              View Usage
-            </button>
+            </Link>
+            <Link
+              to="/credits"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              View Credits
+            </Link>
           </div>
         </div>
       </main>

@@ -6,6 +6,8 @@ import prisma from './utils/prisma';
 import authRoutes from './routes/auth.routes';
 import adminRoutes from './routes/admin.routes';
 import proxyRoutes from './routes/proxy.routes';
+import apiKeyRoutes from './routes/apiKey.routes';
+import userRoutes from './routes/user.routes';
 
 dotenv.config();
 
@@ -32,6 +34,12 @@ app.get('/api', (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// User routes
+app.use('/api/users', userRoutes);
+
+// API Key routes
+app.use('/api/api-keys', apiKeyRoutes);
 
 // Admin routes
 app.use('/api/admin', adminRoutes);
