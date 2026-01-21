@@ -22,9 +22,36 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// Health check endpoint with database status
+app.get('/health', async (req, res) => {
+  const health: {
+    status: string;
+    timestamp: string;
+    uptime: number;
+    database: string;
+    redis?: string;
+    version?: string;
+  } = {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    database: 'unknown',
+  };
+
+  try {
+    // Check database connection
+    await prisma.$queryRaw`SELECT 1`;
+    health.database = 'connected';
+  } catch (error) {
+    health.status = 'degraded';
+    health.database = 'disconnected';
+  }
+
+  // Add version info if available
+  health.version = process.env.npm_package_version || '1.0.0';
+
+  const statusCode = health.status === 'ok' ? 200 : 503;
+  res.status(statusCode).json(health);
 });
 
 // API routes placeholder
