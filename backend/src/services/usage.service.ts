@@ -193,26 +193,29 @@ export class UsageService {
   ): Promise<UsageByTimeEntry[]> {
     const dateFormat = this.getDateFormat(groupBy);
 
-    const results = await prisma.$queryRaw<Array<{
-      date: string;
-      requests: bigint;
-      tokens_input: bigint;
-      tokens_output: bigint;
-      cost: Prisma.Decimal;
-    }>>`
+    // Use $queryRawUnsafe because Prisma template literals can't interpolate date format strings
+    const query = `
       SELECT
-        TO_CHAR(created_at, ${dateFormat}) as date,
+        TO_CHAR(created_at, '${dateFormat}') as date,
         COUNT(*)::bigint as requests,
         COALESCE(SUM(tokens_input), 0)::bigint as tokens_input,
         COALESCE(SUM(tokens_output), 0)::bigint as tokens_output,
         COALESCE(SUM(cost), 0) as cost
       FROM api_requests
-      WHERE user_id = ${userId}::uuid
-        AND created_at >= ${startDate}
-        AND created_at <= ${endDate}
-      GROUP BY TO_CHAR(created_at, ${dateFormat})
+      WHERE user_id = $1::uuid
+        AND created_at >= $2
+        AND created_at <= $3
+      GROUP BY TO_CHAR(created_at, '${dateFormat}')
       ORDER BY date ASC
     `;
+
+    const results = await prisma.$queryRawUnsafe<Array<{
+      date: string;
+      requests: bigint;
+      tokens_input: bigint;
+      tokens_output: bigint;
+      cost: Prisma.Decimal;
+    }>>(query, userId, startDate, endDate);
 
     return results.map(r => ({
       date: r.date,
@@ -494,25 +497,28 @@ export class UsageService {
   ): Promise<UsageByTimeEntry[]> {
     const dateFormat = this.getDateFormat(groupBy);
 
-    const results = await prisma.$queryRaw<Array<{
-      date: string;
-      requests: bigint;
-      tokens_input: bigint;
-      tokens_output: bigint;
-      cost: Prisma.Decimal;
-    }>>`
+    // Use $queryRawUnsafe because Prisma template literals can't interpolate date format strings
+    const query = `
       SELECT
-        TO_CHAR(created_at, ${dateFormat}) as date,
+        TO_CHAR(created_at, '${dateFormat}') as date,
         COUNT(*)::bigint as requests,
         COALESCE(SUM(tokens_input), 0)::bigint as tokens_input,
         COALESCE(SUM(tokens_output), 0)::bigint as tokens_output,
         COALESCE(SUM(cost), 0) as cost
       FROM api_requests
-      WHERE created_at >= ${startDate}
-        AND created_at <= ${endDate}
-      GROUP BY TO_CHAR(created_at, ${dateFormat})
+      WHERE created_at >= $1
+        AND created_at <= $2
+      GROUP BY TO_CHAR(created_at, '${dateFormat}')
       ORDER BY date ASC
     `;
+
+    const results = await prisma.$queryRawUnsafe<Array<{
+      date: string;
+      requests: bigint;
+      tokens_input: bigint;
+      tokens_output: bigint;
+      cost: Prisma.Decimal;
+    }>>(query, startDate, endDate);
 
     return results.map(r => ({
       date: r.date,
