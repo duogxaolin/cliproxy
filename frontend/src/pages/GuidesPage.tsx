@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useTranslation } from '../i18n';
+import Logo from '../components/Logo';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 interface BlogPost {
   id: string;
@@ -19,8 +22,9 @@ export default function GuidesPage() {
   const [currentPost, setCurrentPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuthStore();
+  const { t, language } = useTranslation();
 
-  const baseUrl = import.meta.env.VITE_API_URL || 
+  const baseUrl = import.meta.env.VITE_API_URL ||
     (window.location.hostname === 'localhost' ? 'http://localhost:3000' : `${window.location.protocol}//${window.location.hostname}:4567`);
 
   useEffect(() => {
@@ -50,7 +54,8 @@ export default function GuidesPage() {
   }, [slug, baseUrl]);
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', {
+    const locale = language === 'vi' ? 'vi-VN' : language === 'zh' ? 'zh-CN' : 'en-US';
+    return new Date(dateStr).toLocaleDateString(locale, {
       year: 'numeric', month: 'long', day: 'numeric'
     });
   };
@@ -61,23 +66,17 @@ export default function GuidesPage() {
       <nav className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <span className="text-xl font-bold text-gray-900">API Marketplace</span>
-            </Link>
+            <Logo to="/" />
             <div className="flex items-center space-x-4">
-              <Link to="/models" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Models & Pricing</Link>
+              <Link to="/models" className="text-gray-600 hover:text-gray-900 text-sm font-medium">{t.nav.modelsAndPricing}</Link>
+              <LanguageSwitcher />
               {isAuthenticated ? (
                 <Link to="/dashboard" className="bg-primary-600 text-white hover:bg-primary-700 px-4 py-2 rounded-lg text-sm font-medium">
-                  Dashboard
+                  {t.nav.dashboard}
                 </Link>
               ) : (
                 <Link to="/register" className="bg-primary-600 text-white hover:bg-primary-700 px-4 py-2 rounded-lg text-sm font-medium">
-                  Get Started
+                  {t.nav.getStarted}
                 </Link>
               )}
             </div>
@@ -95,41 +94,41 @@ export default function GuidesPage() {
           /* Single Post View */
           <article>
             <Link to="/guides" className="text-primary-600 hover:underline text-sm mb-4 inline-block">
-              ← Back to Guides
+              {t.guides.backToGuides}
             </Link>
             <h1 className="text-4xl font-bold text-gray-900 mb-4">{currentPost.title}</h1>
             <div className="flex items-center text-sm text-gray-500 mb-8">
-              <span>By {currentPost.author.username}</span>
+              <span>{t.guides.by} {currentPost.author.username}</span>
               <span className="mx-2">•</span>
               <span>{formatDate(currentPost.publishedAt)}</span>
             </div>
             {currentPost.coverImage && (
               <img src={currentPost.coverImage} alt={currentPost.title} className="w-full rounded-xl mb-8" />
             )}
-            <div 
+            <div
               className="prose prose-lg max-w-none"
               dangerouslySetInnerHTML={{ __html: currentPost.content || '' }}
             />
           </article>
         ) : slug && !currentPost ? (
           <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Post not found</h2>
-            <Link to="/guides" className="text-primary-600 hover:underline">Back to Guides</Link>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{t.guides.postNotFound}</h2>
+            <Link to="/guides" className="text-primary-600 hover:underline">{t.guides.backToGuides}</Link>
           </div>
         ) : (
           /* Posts List */
           <>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Guides & Documentation</h1>
-            <p className="text-lg text-gray-600 mb-8">Learn how to use our API effectively.</p>
-            
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{t.guides.title}</h1>
+            <p className="text-lg text-gray-600 mb-8">{t.guides.description}</p>
+
             {posts.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-xl border">
-                <p className="text-gray-500">No guides available yet. Check back soon!</p>
+                <p className="text-gray-500">{t.guides.noGuides}</p>
               </div>
             ) : (
               <div className="space-y-6">
                 {posts.map((post) => (
-                  <Link key={post.id} to={`/guides/${post.slug}`} 
+                  <Link key={post.id} to={`/guides/${post.slug}`}
                     className="block bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
                     <div className="flex gap-6">
                       {post.coverImage && (

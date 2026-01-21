@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useTranslation } from '../i18n';
+import Logo from '../components/Logo';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 interface PublicModel {
   id: string;
@@ -15,11 +18,12 @@ export default function ModelsPage() {
   const [models, setModels] = useState<PublicModel[]>([]);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuthStore();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        const baseUrl = import.meta.env.VITE_API_URL || 
+        const baseUrl = import.meta.env.VITE_API_URL ||
           (window.location.hostname === 'localhost' ? 'http://localhost:3000' : `${window.location.protocol}//${window.location.hostname}:4567`);
         const response = await fetch(`${baseUrl}/api/public/models`);
         const data = await response.json();
@@ -44,23 +48,17 @@ export default function ModelsPage() {
       <nav className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <span className="text-xl font-bold text-gray-900">API Marketplace</span>
-            </Link>
+            <Logo to="/" />
             <div className="flex items-center space-x-4">
-              <Link to="/guides" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Guides</Link>
+              <Link to="/guides" className="text-gray-600 hover:text-gray-900 text-sm font-medium">{t.nav.guides}</Link>
+              <LanguageSwitcher />
               {isAuthenticated ? (
                 <Link to="/dashboard" className="bg-primary-600 text-white hover:bg-primary-700 px-4 py-2 rounded-lg text-sm font-medium">
-                  Dashboard
+                  {t.nav.dashboard}
                 </Link>
               ) : (
                 <Link to="/register" className="bg-primary-600 text-white hover:bg-primary-700 px-4 py-2 rounded-lg text-sm font-medium">
-                  Get Started
+                  {t.nav.getStarted}
                 </Link>
               )}
             </div>
@@ -71,9 +69,9 @@ export default function ModelsPage() {
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-3xl font-bold text-gray-900">Models & Pricing</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t.models.title}</h1>
           <p className="mt-2 text-lg text-gray-600">
-            Access powerful AI models through our unified API. Pay only for what you use.
+            {t.models.description}
           </p>
         </div>
       </div>
@@ -86,7 +84,7 @@ export default function ModelsPage() {
           </div>
         ) : models.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">No models available at the moment.</p>
+            <p className="text-gray-500">{t.models.noModels}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -98,17 +96,17 @@ export default function ModelsPage() {
                     <p className="text-sm text-gray-500">{model.providerModel}</p>
                   </div>
                   <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
-                    Active
+                    {t.models.active}
                   </span>
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center py-2 border-t border-gray-100">
-                    <span className="text-sm text-gray-600">Input Price</span>
-                    <span className="text-sm font-medium text-emerald-600">{formatPrice(model.pricingInput)}/token</span>
+                    <span className="text-sm text-gray-600">{t.models.inputPrice}</span>
+                    <span className="text-sm font-medium text-emerald-600">{formatPrice(model.pricingInput)}{t.models.perToken}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-t border-gray-100">
-                    <span className="text-sm text-gray-600">Output Price</span>
-                    <span className="text-sm font-medium text-blue-600">{formatPrice(model.pricingOutput)}/token</span>
+                    <span className="text-sm text-gray-600">{t.models.outputPrice}</span>
+                    <span className="text-sm font-medium text-blue-600">{formatPrice(model.pricingOutput)}{t.models.perToken}</span>
                   </div>
                 </div>
               </div>
@@ -118,21 +116,21 @@ export default function ModelsPage() {
 
         {/* Usage Instructions */}
         <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">How to Use</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.models.howToUse}</h2>
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">1. Get your API Key</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">1. {t.models.getApiKey}</h3>
                 <p className="text-gray-600">
                   {isAuthenticated ? (
-                    <Link to="/api-keys" className="text-primary-600 hover:underline">Go to API Keys page</Link>
+                    <Link to="/api-keys" className="text-primary-600 hover:underline">{t.models.goToApiKeys}</Link>
                   ) : (
-                    <><Link to="/register" className="text-primary-600 hover:underline">Create an account</Link> and generate your API key.</>
+                    <><Link to="/register" className="text-primary-600 hover:underline">{t.models.createAccountFirst}</Link> {t.models.andGenerateKey}</>
                   )}
                 </p>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">2. Make API Requests</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">2. {t.models.makeApiRequests}</h3>
                 <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
                   <pre className="text-sm text-gray-100">
 {`curl -X POST ${window.location.protocol}//${window.location.hostname}:4569/v1/messages \\

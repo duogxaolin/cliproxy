@@ -229,7 +229,7 @@ export default function BlogPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
             <Editor
-              tinymceScriptSrc="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js"
+              tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"
               onInit={(_evt, editor) => editorRef.current = editor}
               value={formData.content}
               onEditorChange={(content) => setFormData(prev => ({ ...prev, content }))}

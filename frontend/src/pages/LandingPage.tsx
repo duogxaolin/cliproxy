@@ -1,8 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useTranslation } from '../i18n';
+import Logo from '../components/Logo';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function LandingPage() {
   const { isAuthenticated, user, logout } = useAuthStore();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     await logout();
@@ -14,34 +18,28 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <span className="text-xl font-bold text-gray-900">API Marketplace</span>
-            </div>
+            <Logo to="/" />
 
             {/* Navigation Links */}
             <div className="hidden md:flex items-center space-x-6">
               <Link to="/models" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors">
-                Models & Pricing
+                {t.nav.modelsAndPricing}
               </Link>
               <Link to="/guides" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors">
-                Guides
+                {t.nav.guides}
               </Link>
             </div>
 
             {/* Auth Section */}
             <div className="flex items-center space-x-4">
+              <LanguageSwitcher />
               {isAuthenticated ? (
                 <>
                   <Link
                     to="/dashboard"
                     className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors"
                   >
-                    Dashboard
+                    {t.nav.dashboard}
                   </Link>
                   <div className="flex items-center space-x-3">
                     <div className="flex items-center space-x-2">
@@ -58,7 +56,7 @@ export default function LandingPage() {
                       onClick={handleLogout}
                       className="text-gray-500 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors"
                     >
-                      Sign out
+                      {t.nav.signOut}
                     </button>
                   </div>
                 </>
@@ -68,13 +66,13 @@ export default function LandingPage() {
                     to="/login"
                     className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors"
                   >
-                    Sign in
+                    {t.nav.signIn}
                   </Link>
                   <Link
                     to="/register"
                     className="bg-primary-600 text-white hover:bg-primary-700 px-5 py-2.5 rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow-md"
                   >
-                    Get Started
+                    {t.nav.getStarted}
                   </Link>
                 </>
               )}
@@ -97,19 +95,18 @@ export default function LandingPage() {
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center px-4 py-2 bg-primary-50 rounded-full text-primary-700 text-sm font-medium mb-8">
               <span className="w-2 h-2 bg-primary-500 rounded-full mr-2 animate-pulse" />
-              Unified API Access Platform
+              {t.landing.tagline}
             </div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 tracking-tight">
-              API Access
+              {t.landing.heroTitle}
               <span className="block mt-2 bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent">
-                Made Simple
+                {t.landing.heroTitleHighlight}
               </span>
             </h1>
 
             <p className="mt-8 text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Access powerful AI models through a unified API endpoint.
-              Pay only for what you use with our transparent credit-based billing system.
+              {t.landing.heroDescription}
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -117,16 +114,16 @@ export default function LandingPage() {
                 to="/register"
                 className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-primary-600 text-white rounded-xl text-base font-semibold hover:bg-primary-700 transition-all shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 hover:-translate-y-0.5"
               >
-                Start Using APIs
+                {t.landing.startUsing}
                 <svg className="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </Link>
               <Link
-                to="/login"
+                to="/guides"
                 className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-white text-gray-700 rounded-xl text-base font-semibold border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
               >
-                View Documentation
+                {t.landing.viewDocs}
               </Link>
             </div>
 
@@ -134,15 +131,15 @@ export default function LandingPage() {
             <div className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
               <div>
                 <div className="text-3xl font-bold text-gray-900">99.9%</div>
-                <div className="text-sm text-gray-500 mt-1">Uptime</div>
+                <div className="text-sm text-gray-500 mt-1">{t.landing.uptime}</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-gray-900">&lt;50ms</div>
-                <div className="text-sm text-gray-500 mt-1">Latency</div>
+                <div className="text-sm text-gray-500 mt-1">{t.landing.latency}</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-gray-900">10+</div>
-                <div className="text-sm text-gray-500 mt-1">AI Models</div>
+                <div className="text-sm text-gray-500 mt-1">{t.landing.aiModels}</div>
               </div>
             </div>
           </div>
@@ -154,10 +151,10 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
-              Everything you need to scale
+              {t.landing.everythingYouNeed}
             </h2>
             <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-              A complete platform for managing API access, tracking usage, and controlling costs.
+              {t.landing.platformDescription}
             </p>
           </div>
 
@@ -169,9 +166,9 @@ export default function LandingPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">API Proxy</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">{t.landing.apiProxy}</h3>
               <p className="text-gray-600 leading-relaxed">
-                Unified endpoint for multiple AI providers. Low latency proxy with automatic failover and load balancing.
+                {t.landing.apiProxyDesc}
               </p>
             </div>
 
@@ -182,9 +179,9 @@ export default function LandingPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Credit System</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">{t.landing.creditSystem}</h3>
               <p className="text-gray-600 leading-relaxed">
-                Pay-as-you-go pricing with transparent billing. Track spending in real-time with detailed transaction history.
+                {t.landing.creditSystemDesc}
               </p>
             </div>
 
@@ -195,9 +192,9 @@ export default function LandingPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Usage Analytics</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">{t.landing.usageAnalytics}</h3>
               <p className="text-gray-600 leading-relaxed">
-                Comprehensive dashboards with usage metrics. Monitor requests, tokens, and costs across all your API keys.
+                {t.landing.usageAnalyticsDesc}
               </p>
             </div>
           </div>
@@ -210,10 +207,10 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                Enterprise-grade security
+                {t.landing.enterpriseSecurity}
               </h2>
               <p className="text-lg text-gray-600 mb-8">
-                Your data and API keys are protected with industry-leading security measures.
+                {t.landing.securityDesc}
               </p>
 
               <div className="space-y-6">
@@ -224,8 +221,8 @@ export default function LandingPage() {
                     </svg>
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-semibold text-gray-900">Encrypted API Keys</h4>
-                    <p className="text-gray-600 mt-1">All API keys are hashed with SHA-256 and never stored in plain text.</p>
+                    <h4 className="text-lg font-semibold text-gray-900">{t.landing.encryptedKeys}</h4>
+                    <p className="text-gray-600 mt-1">{t.landing.encryptedKeysDesc}</p>
                   </div>
                 </div>
 
@@ -236,8 +233,8 @@ export default function LandingPage() {
                     </svg>
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-semibold text-gray-900">Rate Limiting</h4>
-                    <p className="text-gray-600 mt-1">Built-in protection against abuse with configurable rate limits per key.</p>
+                    <h4 className="text-lg font-semibold text-gray-900">{t.landing.rateLimiting}</h4>
+                    <p className="text-gray-600 mt-1">{t.landing.rateLimitingDesc}</p>
                   </div>
                 </div>
 
@@ -248,8 +245,8 @@ export default function LandingPage() {
                     </svg>
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-semibold text-gray-900">Granular Permissions</h4>
-                    <p className="text-gray-600 mt-1">Control which models each API key can access with fine-grained permissions.</p>
+                    <h4 className="text-lg font-semibold text-gray-900">{t.landing.granularPermissions}</h4>
+                    <p className="text-gray-600 mt-1">{t.landing.granularPermissionsDesc}</p>
                   </div>
                 </div>
               </div>
@@ -258,16 +255,16 @@ export default function LandingPage() {
             <div className="relative">
               <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
                 <div className="flex items-center justify-between mb-6">
-                  <span className="text-sm font-medium text-gray-500">API Key Settings</span>
-                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">Active</span>
+                  <span className="text-sm font-medium text-gray-500">{t.landing.apiKeySettings}</span>
+                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">{t.models.active}</span>
                 </div>
                 <div className="space-y-4">
                   <div className="p-4 bg-gray-50 rounded-xl">
-                    <div className="text-xs text-gray-500 mb-1">Key Name</div>
-                    <div className="font-medium text-gray-900">Production API Key</div>
+                    <div className="text-xs text-gray-500 mb-1">{t.landing.keyName}</div>
+                    <div className="font-medium text-gray-900">{t.landing.productionApiKey}</div>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-xl">
-                    <div className="text-xs text-gray-500 mb-1">Allowed Models</div>
+                    <div className="text-xs text-gray-500 mb-1">{t.landing.allowedModels}</div>
                     <div className="flex flex-wrap gap-2 mt-2">
                       <span className="px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-md">claude-3-opus</span>
                       <span className="px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-md">gpt-4</span>
@@ -275,11 +272,11 @@ export default function LandingPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-gray-50 rounded-xl">
-                      <div className="text-xs text-gray-500 mb-1">Quota Used</div>
+                      <div className="text-xs text-gray-500 mb-1">{t.landing.quotaUsed}</div>
                       <div className="font-medium text-gray-900">2,450 / 10,000</div>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-xl">
-                      <div className="text-xs text-gray-500 mb-1">Expires</div>
+                      <div className="text-xs text-gray-500 mb-1">{t.landing.expires}</div>
                       <div className="font-medium text-gray-900">Dec 31, 2026</div>
                     </div>
                   </div>
@@ -298,17 +295,17 @@ export default function LandingPage() {
           {isAuthenticated ? (
             <>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-                Welcome back, {user?.username}!
+                {t.landing.welcomeBack}, {user?.username}!
               </h2>
               <p className="text-xl text-primary-100 mb-10 max-w-2xl mx-auto">
-                Continue using our powerful AI models through your dashboard.
+                {t.landing.continueUsing}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   to="/dashboard"
                   className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-white text-primary-700 rounded-xl text-base font-semibold hover:bg-gray-50 transition-all shadow-lg"
                 >
-                  Go to Dashboard
+                  {t.landing.goToDashboard}
                   <svg className="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -317,30 +314,30 @@ export default function LandingPage() {
                   to="/api-keys"
                   className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-primary-500/20 text-white rounded-xl text-base font-semibold border border-white/20 hover:bg-primary-500/30 transition-all"
                 >
-                  Manage API Keys
+                  {t.landing.manageApiKeys}
                 </Link>
               </div>
             </>
           ) : (
             <>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-                Ready to get started?
+                {t.landing.readyToStart}
               </h2>
               <p className="text-xl text-primary-100 mb-10 max-w-2xl mx-auto">
-                Create your account today and start accessing powerful AI models through our unified API.
+                {t.landing.createAccount}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   to="/register"
                   className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-white text-primary-700 rounded-xl text-base font-semibold hover:bg-gray-50 transition-all shadow-lg"
                 >
-                  Create Free Account
+                  {t.landing.createFreeAccount}
                 </Link>
                 <Link
                   to="/login"
                   className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-primary-500/20 text-white rounded-xl text-base font-semibold border border-white/20 hover:bg-primary-500/30 transition-all"
                 >
-                  Sign In
+                  {t.nav.signIn}
                 </Link>
               </div>
             </>
@@ -352,16 +349,9 @@ export default function LandingPage() {
       <footer className="bg-gray-900 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <span className="text-lg font-semibold text-white">API Marketplace</span>
-            </div>
+            <Logo to="/" className="mb-4 md:mb-0 [&_span]:text-white" />
             <p className="text-gray-400 text-sm">
-              © 2026 API Marketplace. All rights reserved.
+              © 2026 {t.brandName}. {t.landing.allRightsReserved}
             </p>
           </div>
         </div>

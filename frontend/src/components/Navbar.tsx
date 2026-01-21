@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useTranslation } from '../i18n';
+import Logo from './Logo';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navbar() {
   const { user, logout } = useAuthStore();
+  const { t } = useTranslation();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -33,49 +37,42 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <span className="text-lg font-bold text-gray-900 hidden sm:block">API Marketplace</span>
-            </Link>
+            <Logo to="/dashboard" />
 
             {/* Desktop Navigation */}
             <div className="hidden md:ml-8 md:flex md:space-x-1">
               <Link to="/dashboard" className={linkClass('/dashboard')}>
-                Dashboard
+                {t.nav.dashboard}
               </Link>
               <Link to="/api-keys" className={linkClass('/api-keys')}>
-                API Keys
+                {t.nav.apiKeys}
               </Link>
               <Link to="/credits" className={linkClass('/credits')}>
-                Credits
+                {t.nav.credits}
               </Link>
               <Link to="/usage" className={linkClass('/usage')}>
-                Usage
+                {t.nav.usage}
               </Link>
               {user?.role === 'admin' && (
                 <>
                   <div className="border-l border-gray-200 mx-2" />
                   <Link to="/admin" className={linkClass('/admin')}>
-                    Admin
+                    {t.nav.admin}
                   </Link>
                   <Link to="/admin/users" className={linkClass('/admin/users')}>
-                    Users
+                    {t.nav.users}
                   </Link>
                   <Link to="/admin/models" className={linkClass('/admin/models')}>
-                    Models
+                    {t.nav.models}
                   </Link>
                   <Link to="/admin/cliproxy" className={linkClass('/admin/cliproxy')}>
-                    CLI Proxy
+                    {t.nav.cliProxy}
                   </Link>
                   <Link to="/admin/blog" className={linkClass('/admin/blog')}>
-                    Blog
+                    {t.nav.blog}
                   </Link>
                   <Link to="/admin/settings" className={linkClass('/admin/settings')}>
-                    Settings
+                    {t.nav.settings}
                   </Link>
                 </>
               )}
@@ -84,6 +81,7 @@ export default function Navbar() {
 
           {/* Desktop User Menu */}
           <div className="hidden md:flex items-center space-x-4">
+            <LanguageSwitcher />
             <div className="flex items-center space-x-3 px-3 py-1.5 bg-gray-50 rounded-lg">
               <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-medium">
@@ -102,7 +100,7 @@ export default function Navbar() {
             <button
               onClick={handleLogout}
               className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Logout"
+              title={t.nav.signOut}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -135,41 +133,46 @@ export default function Navbar() {
         <div className="md:hidden border-t border-gray-100 bg-white animate-slide-down">
           <div className="px-4 py-4 space-y-1">
             <Link to="/dashboard" className={mobileLinkClass('/dashboard')} onClick={() => setMobileMenuOpen(false)}>
-              Dashboard
+              {t.nav.dashboard}
             </Link>
             <Link to="/api-keys" className={mobileLinkClass('/api-keys')} onClick={() => setMobileMenuOpen(false)}>
-              API Keys
+              {t.nav.apiKeys}
             </Link>
             <Link to="/credits" className={mobileLinkClass('/credits')} onClick={() => setMobileMenuOpen(false)}>
-              Credits
+              {t.nav.credits}
             </Link>
             <Link to="/usage" className={mobileLinkClass('/usage')} onClick={() => setMobileMenuOpen(false)}>
-              Usage
+              {t.nav.usage}
             </Link>
             {user?.role === 'admin' && (
               <>
                 <div className="border-t border-gray-100 my-2" />
-                <p className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Admin</p>
+                <p className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">{t.nav.admin}</p>
                 <Link to="/admin" className={mobileLinkClass('/admin')} onClick={() => setMobileMenuOpen(false)}>
-                  Dashboard
+                  {t.nav.dashboard}
                 </Link>
                 <Link to="/admin/users" className={mobileLinkClass('/admin/users')} onClick={() => setMobileMenuOpen(false)}>
-                  Users
+                  {t.nav.users}
                 </Link>
                 <Link to="/admin/models" className={mobileLinkClass('/admin/models')} onClick={() => setMobileMenuOpen(false)}>
-                  Models
+                  {t.nav.models}
                 </Link>
                 <Link to="/admin/cliproxy" className={mobileLinkClass('/admin/cliproxy')} onClick={() => setMobileMenuOpen(false)}>
-                  CLI Proxy
+                  {t.nav.cliProxy}
                 </Link>
                 <Link to="/admin/blog" className={mobileLinkClass('/admin/blog')} onClick={() => setMobileMenuOpen(false)}>
-                  Blog
+                  {t.nav.blog}
                 </Link>
                 <Link to="/admin/settings" className={mobileLinkClass('/admin/settings')} onClick={() => setMobileMenuOpen(false)}>
-                  Settings
+                  {t.nav.settings}
                 </Link>
               </>
             )}
+            <div className="border-t border-gray-100 my-2" />
+            {/* Language Switcher for Mobile */}
+            <div className="px-4 py-2">
+              <LanguageSwitcher />
+            </div>
             <div className="border-t border-gray-100 my-2" />
             <div className="px-4 py-3 flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -188,7 +191,7 @@ export default function Navbar() {
               onClick={handleLogout}
               className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
             >
-              Sign out
+              {t.nav.signOut}
             </button>
           </div>
         </div>
