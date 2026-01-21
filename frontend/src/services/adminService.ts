@@ -118,6 +118,32 @@ const toBackendModelData = (data: CreateModelData | UpdateModelData) => {
   return result;
 };
 
+// Convert camelCase from backend response to snake_case for frontend
+interface BackendShadowModel {
+  id: string;
+  displayName: string;
+  providerBaseUrl: string;
+  providerModel: string;
+  providerToken?: string;
+  pricingInput: number;
+  pricingOutput: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const toFrontendModel = (model: BackendShadowModel): ShadowModel => ({
+  id: model.id,
+  display_name: model.displayName,
+  provider_base_url: model.providerBaseUrl,
+  provider_model: model.providerModel,
+  pricing_input: model.pricingInput,
+  pricing_output: model.pricingOutput,
+  is_active: model.isActive,
+  created_at: model.createdAt,
+  updated_at: model.updatedAt,
+});
+
 export interface SystemSetting {
   id: string;
   key: string;
@@ -206,18 +232,18 @@ export const adminService = {
 
   // Models
   async getModels(): Promise<ShadowModel[]> {
-    const response = await api.get<{ data: ShadowModel[] }>('/api/admin/models');
-    return response.data.data;
+    const response = await api.get<{ data: BackendShadowModel[] }>('/api/admin/models');
+    return response.data.data.map(toFrontendModel);
   },
 
   async createModel(data: CreateModelData): Promise<ShadowModel> {
-    const response = await api.post<ShadowModel>('/api/admin/models', toBackendModelData(data));
-    return response.data;
+    const response = await api.post<{ data: BackendShadowModel }>('/api/admin/models', toBackendModelData(data));
+    return toFrontendModel(response.data.data);
   },
 
   async updateModel(id: string, data: UpdateModelData): Promise<ShadowModel> {
-    const response = await api.put<ShadowModel>(`/api/admin/models/${id}`, toBackendModelData(data));
-    return response.data;
+    const response = await api.put<{ data: BackendShadowModel }>(`/api/admin/models/${id}`, toBackendModelData(data));
+    return toFrontendModel(response.data.data);
   },
 
   async deleteModel(id: string): Promise<void> {
