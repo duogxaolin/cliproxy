@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Layout } from '../components/layout';
+import { UserLayout } from '../components/layout';
 import { Card, Button, Input, Badge, Spinner, Modal, ModalFooter, Alert } from '../components/ui';
 import { apiKeyService, ApiKey, ApiKeyCreateResponse } from '../services/apiKeyService';
 
@@ -120,7 +120,7 @@ export default function ApiKeysPage() {
   };
 
   return (
-    <Layout>
+    <UserLayout>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">API Keys</h1>
@@ -338,7 +338,7 @@ export default function ApiKeysPage() {
           </ModalFooter>
         </form>
       </Modal>
-    </Layout>
+    </UserLayout>
   );
 }
 

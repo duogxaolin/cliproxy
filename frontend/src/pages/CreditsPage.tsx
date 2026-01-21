@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Layout } from '../components/layout';
+import { UserLayout } from '../components/layout';
 import { Card, Badge, Spinner, Alert } from '../components/ui';
 import { creditService, CreditsResponse, CreditTransaction } from '../services/creditService';
 
@@ -66,7 +66,7 @@ export default function CreditsPage() {
   };
 
   return (
-    <Layout>
+    <UserLayout>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Credits</h1>
         <p className="mt-1 text-sm text-gray-500">Manage your credit balance and view transaction history.</p>
@@ -195,7 +195,7 @@ export default function CreditsPage() {
           </>
         )}
       </Card>
-    </Layout>
+    </UserLayout>
   );
 }
 

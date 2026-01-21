@@ -4,7 +4,7 @@ export const translations = {
   en: {
     // Brand
     brandName: 'CheapAPI',
-    
+
     // Navigation
     nav: {
       dashboard: 'Dashboard',
@@ -22,6 +22,8 @@ export const translations = {
       signIn: 'Sign in',
       signOut: 'Sign out',
       getStarted: 'Get Started',
+      adminPanel: 'Admin Panel',
+      userDashboard: 'User Dashboard',
     },
     
     // Landing Page
@@ -120,7 +122,7 @@ export const translations = {
   vi: {
     // Brand
     brandName: 'CheapAPI',
-    
+
     // Navigation
     nav: {
       dashboard: 'Bảng điều khiển',
@@ -138,6 +140,8 @@ export const translations = {
       signIn: 'Đăng nhập',
       signOut: 'Đăng xuất',
       getStarted: 'Bắt đầu',
+      adminPanel: 'Trang quản trị',
+      userDashboard: 'Bảng điều khiển người dùng',
     },
     
     // Landing Page
@@ -254,6 +258,8 @@ export const translations = {
       signIn: '登录',
       signOut: '退出',
       getStarted: '开始使用',
+      adminPanel: '管理面板',
+      userDashboard: '用户仪表板',
     },
 
     // Landing Page

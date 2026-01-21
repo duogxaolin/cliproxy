@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Layout } from '../../components/layout';
+import { AdminLayout } from '../../components/layout';
 import { Card, Button, Input, Modal, Badge, Spinner } from '../../components/ui';
 import { adminService, SystemSetting, CreateSettingInput } from '../../services/adminService';
 import { setApiBaseUrl, getApiBaseUrl, getDefaultUrls } from '../../services/api';
@@ -208,7 +208,7 @@ export default function SettingsPage() {
   const filteredSettings = settings.filter(s => s.category === activeCategory);
 
   return (
-    <Layout>
+    <AdminLayout>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">System Settings</h1>
         <p className="mt-1 text-sm text-gray-500">Manage global environment variables, connection settings, and system configuration.</p>
@@ -467,7 +467,7 @@ export default function SettingsPage() {
           </Button>
         </div>
       </Modal>
-    </Layout>
+    </AdminLayout>
   );
 }
 

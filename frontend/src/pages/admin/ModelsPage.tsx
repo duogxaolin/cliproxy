@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Layout } from '../../components/layout';
+import { AdminLayout } from '../../components/layout';
 import { Card, Button, Input, Badge, Spinner, Modal, ModalFooter } from '../../components/ui';
 import { adminService, ShadowModel, CreateModelData } from '../../services/adminService';
 
@@ -110,7 +110,7 @@ export default function ModelsPage() {
   };
 
   return (
-    <Layout>
+    <AdminLayout>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Model Management</h1>
@@ -271,7 +271,7 @@ export default function ModelsPage() {
           </Button>
         </ModalFooter>
       </Modal>
-    </Layout>
+    </AdminLayout>
   );
 }
 

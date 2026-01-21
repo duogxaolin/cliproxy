@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Layout } from '../components/layout';
+import { UserLayout } from '../components/layout';
 import { Card, Badge, Spinner } from '../components/ui';
 import { usageService, UsageSummary, UsageByTimeEntry, UsageByModelEntry, UsageByKeyEntry, RequestLog } from '../services/usageService';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend } from 'recharts';
@@ -93,7 +93,7 @@ export default function UsagePage() {
   );
 
   return (
-    <Layout>
+    <UserLayout>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Usage Analytics</h1>
@@ -312,7 +312,7 @@ export default function UsagePage() {
           </div>
         )}
       </Card>
-    </Layout>
+    </UserLayout>
   );
 }
 

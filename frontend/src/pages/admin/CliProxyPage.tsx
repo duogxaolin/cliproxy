@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Layout } from '../../components/layout';
+import { AdminLayout } from '../../components/layout';
 import { Card, Button, Badge, Spinner } from '../../components/ui';
 
 // Auto-detect CLI Proxy URL based on current window location
@@ -106,7 +106,7 @@ export default function CliProxyPage() {
   };
 
   return (
-    <Layout>
+    <AdminLayout>
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
@@ -301,7 +301,7 @@ export default function CliProxyPage() {
           </div>
         </div>
       </Card>
-    </Layout>
+    </AdminLayout>
   );
 }
 

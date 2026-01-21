@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Layout } from '../components/layout';
+import { UserLayout } from '../components/layout';
 import { Card, Button, Spinner } from '../components/ui';
 import { creditService } from '../services/creditService';
 import { apiKeyService } from '../services/apiKeyService';
@@ -75,7 +75,7 @@ export default function Dashboard() {
   );
 
   return (
-    <Layout>
+    <UserLayout>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="mt-1 text-sm text-gray-500">Welcome back! Here's an overview of your account.</p>
@@ -148,7 +148,7 @@ export default function Dashboard() {
           </Link>
         </div>
       </div>
-    </Layout>
+    </UserLayout>
   );
 }
 
