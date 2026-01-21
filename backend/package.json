@@ -5,8 +5,10 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "dev:cliproxy": "ts-node-dev --respawn --transpile-only src/cliproxy.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "start:cliproxy": "node dist/cliproxy.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:prod": "prisma migrate deploy"
