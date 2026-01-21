@@ -2,24 +2,26 @@ import { useState, useEffect } from 'react';
 import { Layout } from '../../components/layout';
 import { Card, Button, Input, Modal, Badge, Spinner } from '../../components/ui';
 import { adminService, SystemSetting, CreateSettingInput } from '../../services/adminService';
-import { setApiBaseUrl, getApiBaseUrl } from '../../services/api';
+import { setApiBaseUrl, getApiBaseUrl, getDefaultUrls } from '../../services/api';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon, Cog6ToothIcon, ServerIcon, GlobeAltIcon, LinkIcon } from '@heroicons/react/24/outline';
 
 type Category = 'environment' | 'connection' | 'system';
 type DataType = 'string' | 'number' | 'boolean' | 'json';
 
-// Special settings that are stored in localStorage and affect the app immediately
-const SPECIAL_SETTINGS = {
-  API_BASE_URL: {
-    localStorageKey: 'api_base_url',
-    description: 'Backend API URL (changes take effect immediately)',
-    defaultValue: () => getApiBaseUrl(),
-  },
-  CLI_PROXY_URL: {
-    localStorageKey: 'cli_proxy_url',
-    description: 'CLI Proxy Control Panel URL',
-    defaultValue: () => localStorage.getItem('cli_proxy_url') || import.meta.env.VITE_CLI_PROXY_URL || 'http://localhost:4569',
-  },
+// Auto-detect CLI Proxy URL based on current window location
+const getDefaultCliProxyUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname } = window.location;
+    return `${protocol}//${hostname}:4569`;
+  }
+  return 'http://localhost:4569';
+};
+
+// Get current CLI Proxy URL (from localStorage or auto-detect)
+const getCurrentCliProxyUrl = (): string => {
+  const saved = localStorage.getItem('cli_proxy_url');
+  if (saved) return saved;
+  return import.meta.env.VITE_CLI_PROXY_URL || getDefaultCliProxyUrl();
 };
 
 const CATEGORIES: { value: Category; label: string; icon: React.ReactNode; description: string }[] = [
@@ -49,8 +51,8 @@ export default function SettingsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Special URL settings state (stored in localStorage)
-  const [apiBaseUrl, setApiBaseUrlState] = useState(SPECIAL_SETTINGS.API_BASE_URL.defaultValue());
-  const [cliProxyUrl, setCliProxyUrlState] = useState(SPECIAL_SETTINGS.CLI_PROXY_URL.defaultValue());
+  const [apiBaseUrl, setApiBaseUrlState] = useState(getApiBaseUrl());
+  const [cliProxyUrl, setCliProxyUrlState] = useState(getCurrentCliProxyUrl());
   const [savingUrls, setSavingUrls] = useState(false);
 
   // Form state
@@ -88,21 +90,20 @@ export default function SettingsPage() {
     }
   };
 
-  // Reset URL settings to defaults
+  // Reset URL settings to defaults (auto-detect from current hostname)
   const handleResetUrlSettings = () => {
-    const defaultApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4567';
-    const defaultCliProxyUrl = import.meta.env.VITE_CLI_PROXY_URL || 'http://localhost:4569';
+    const defaults = getDefaultUrls();
 
-    setApiBaseUrlState(defaultApiUrl);
-    setCliProxyUrlState(defaultCliProxyUrl);
+    setApiBaseUrlState(defaults.apiUrl);
+    setCliProxyUrlState(defaults.cliProxyUrl);
 
     localStorage.removeItem('api_base_url');
     localStorage.removeItem('cli_proxy_url');
 
     // Reset axios baseURL
-    setApiBaseUrl(defaultApiUrl);
+    setApiBaseUrl(defaults.apiUrl);
 
-    setSuccessMessage('URL settings reset to defaults');
+    setSuccessMessage('URL settings reset to auto-detected defaults based on current hostname');
     setTimeout(() => setSuccessMessage(null), 3000);
   };
 

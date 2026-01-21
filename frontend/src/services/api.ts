@@ -1,13 +1,39 @@
 import axios from 'axios';
 
-// Get API URL from localStorage (set by admin) or fallback to env/default
+// Auto-detect server URL based on current window location
+const getDefaultApiUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname } = window.location;
+    // Use port 4567 for API by default
+    return `${protocol}//${hostname}:4567`;
+  }
+  return 'http://localhost:4567';
+};
+
+const getDefaultCliProxyUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname } = window.location;
+    // Use port 4569 for CLI Proxy by default
+    return `${protocol}//${hostname}:4569`;
+  }
+  return 'http://localhost:4569';
+};
+
+// Get API URL from localStorage (set by admin) or fallback to auto-detected URL
 const getApiUrl = (): string => {
   const savedApiUrl = localStorage.getItem('api_base_url');
   if (savedApiUrl) {
     return savedApiUrl;
   }
-  return import.meta.env.VITE_API_URL || 'http://localhost:4567';
+  // Check env variable first, then auto-detect
+  return import.meta.env.VITE_API_URL || getDefaultApiUrl();
 };
+
+// Export function to get default URLs (for settings page)
+export const getDefaultUrls = () => ({
+  apiUrl: import.meta.env.VITE_API_URL || getDefaultApiUrl(),
+  cliProxyUrl: import.meta.env.VITE_CLI_PROXY_URL || getDefaultCliProxyUrl(),
+});
 
 // Export function to update API URL dynamically
 export const setApiBaseUrl = (url: string): void => {
