@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
+import { Layout } from '../components/layout';
+import { Card, Badge, Spinner, Alert } from '../components/ui';
 import { creditService, CreditsResponse, CreditTransaction } from '../services/creditService';
 
 export default function CreditsPage() {
@@ -51,113 +52,112 @@ export default function CreditsPage() {
     return `${prefix}$${amount.toFixed(4)}`;
   };
 
-  const getTypeColor = (type: string) => {
+  const getTypeBadgeVariant = (type: string): 'success' | 'danger' | 'info' | 'default' => {
     switch (type) {
       case 'grant':
-        return 'bg-green-100 text-green-800';
+        return 'success';
       case 'deduction':
-        return 'bg-red-100 text-red-800';
+        return 'danger';
       case 'refund':
-        return 'bg-blue-100 text-blue-800';
+        return 'info';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'default';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Credits</h2>
+    <Layout>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Credits</h1>
+        <p className="mt-1 text-sm text-gray-500">Manage your credit balance and view transaction history.</p>
+      </div>
 
-        {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md text-red-700">
-            {error}
+      {error && (
+        <Alert variant="error" className="mb-6" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
+      {/* Balance Card */}
+      <Card className="mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="text-center md:text-left">
+            <p className="text-sm font-medium text-gray-500 mb-1">Current Balance</p>
+            <p className="text-4xl font-bold text-gray-900">
+              ${credits?.balance.toFixed(4) || '0.0000'}
+            </p>
           </div>
-        )}
-
-        {/* Balance Card */}
-        <div className="bg-white shadow rounded-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Current Balance</p>
-              <p className="text-3xl font-bold text-gray-900">
-                ${credits?.balance.toFixed(4) || '0.0000'}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Total Purchased</p>
-              <p className="text-2xl font-semibold text-green-600">
-                ${credits?.total_purchased.toFixed(4) || '0.0000'}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Total Consumed</p>
-              <p className="text-2xl font-semibold text-red-600">
-                ${credits?.total_consumed.toFixed(4) || '0.0000'}
-              </p>
-            </div>
+          <div className="text-center md:text-left">
+            <p className="text-sm font-medium text-gray-500 mb-1">Total Purchased</p>
+            <p className="text-2xl font-semibold text-emerald-600">
+              +${credits?.total_purchased.toFixed(4) || '0.0000'}
+            </p>
+          </div>
+          <div className="text-center md:text-left">
+            <p className="text-sm font-medium text-gray-500 mb-1">Total Consumed</p>
+            <p className="text-2xl font-semibold text-red-600">
+              -${credits?.total_consumed.toFixed(4) || '0.0000'}
+            </p>
           </div>
         </div>
+      </Card>
 
-        {/* Transaction History */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="text-lg font-medium text-gray-900">Transaction History</h3>
-            <select
-              value={filterType}
-              onChange={(e) => { setFilterType(e.target.value); setPage(1); }}
-              className="border border-gray-300 rounded-md px-3 py-1.5 text-sm"
-            >
-              <option value="">All Types</option>
-              <option value="grant">Grants</option>
-              <option value="deduction">Deductions</option>
-              <option value="refund">Refunds</option>
-            </select>
+      {/* Transaction History */}
+      <Card padding="none">
+        <div className="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <h2 className="text-lg font-semibold text-gray-900">Transaction History</h2>
+          <select
+            value={filterType}
+            onChange={(e) => { setFilterType(e.target.value); setPage(1); }}
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+          >
+            <option value="">All Types</option>
+            <option value="grant">Grants</option>
+            <option value="deduction">Deductions</option>
+            <option value="refund">Refunds</option>
+          </select>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Spinner size="lg" />
           </div>
-
-          {loading ? (
-            <div className="text-center py-8 text-gray-500">Loading...</div>
-          ) : transactions.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No transactions yet.</div>
-          ) : (
-            <>
+        ) : transactions.length === 0 ? (
+          <div className="text-center py-12">
+            <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <p className="text-gray-500">No transactions yet.</p>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Description
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      Amount
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      Balance After
-                    </th>
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</th>
+                    <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Balance After</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {transactions.map((tx) => (
-                    <tr key={tx.id}>
+                    <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(tx.created_at)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTypeColor(tx.type)}`}>
+                        <Badge variant={getTypeBadgeVariant(tx.type)}>
                           {tx.type}
-                        </span>
+                        </Badge>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {tx.description || '-'}
                       </td>
-                      <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${
-                        tx.amount >= 0 ? 'text-green-600' : 'text-red-600'
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-semibold ${
+                        tx.amount >= 0 ? 'text-emerald-600' : 'text-red-600'
                       }`}>
                         {formatAmount(tx.amount)}
                       </td>
@@ -168,34 +168,34 @@ export default function CreditsPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
-                  <button
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
-                  >
-                    Previous
-                  </button>
-                  <span className="text-sm text-gray-500">
-                    Page {page} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
-                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </main>
-    </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-gray-100 flex justify-between items-center">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-gray-500">
+                  Page {page} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </Card>
+    </Layout>
   );
 }
 

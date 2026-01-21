@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import Navbar from '../../components/Navbar';
+import { Layout } from '../../components/layout';
+import { Card, Button, Input, Badge, Spinner, Modal, ModalFooter } from '../../components/ui';
 import { adminService, ShadowModel, CreateModelData } from '../../services/adminService';
 
 export default function ModelsPage() {
@@ -106,137 +107,168 @@ export default function ModelsPage() {
   const formatPrice = (price: number) => `$${price.toFixed(6)}/token`;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Model Management</h2>
-          <button onClick={openCreateModal}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
-            Add Model
-          </button>
+    <Layout>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Model Management</h1>
+          <p className="mt-1 text-sm text-gray-500">Configure shadow models and pricing.</p>
         </div>
+        <Button
+          onClick={openCreateModal}
+          leftIcon={
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          }
+        >
+          Add Model
+        </Button>
+      </div>
 
-        {/* Models Table */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+      {/* Models Table */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Spinner size="lg" />
+        </div>
+      ) : models.length === 0 ? (
+        <Card className="text-center py-12">
+          <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+          </svg>
+          <p className="text-gray-500 mb-4">No models configured yet.</p>
+          <Button onClick={openCreateModal}>Add Your First Model</Button>
+        </Card>
+      ) : (
+        <Card padding="none">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Display Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Provider Model</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pricing (In/Out)</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Display Name</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Provider Model</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pricing (In/Out)</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {loading ? (
-                  <tr><td colSpan={5} className="px-6 py-4 text-center text-gray-500">Loading...</td></tr>
-                ) : models.length === 0 ? (
-                  <tr><td colSpan={5} className="px-6 py-4 text-center text-gray-500">No models configured</td></tr>
-                ) : (
-                  models.map((model) => (
-                    <tr key={model.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{model.display_name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{model.provider_model}</div>
-                        <div className="text-xs text-gray-400 truncate max-w-xs">{model.provider_base_url}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatPrice(model.pricing_input)} / {formatPrice(model.pricing_output)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button onClick={() => handleToggleActive(model)}
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            model.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                          }`}>
+                {models.map((model) => (
+                  <tr key={model.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm font-medium text-gray-900">{model.display_name}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{model.provider_model}</div>
+                      <div className="text-xs text-gray-400 truncate max-w-xs">{model.provider_base_url}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <span className="text-emerald-600">{formatPrice(model.pricing_input)}</span>
+                      {' / '}
+                      <span className="text-blue-600">{formatPrice(model.pricing_output)}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button onClick={() => handleToggleActive(model)}>
+                        <Badge variant={model.is_active ? 'success' : 'default'} size="sm">
                           {model.is_active ? 'Active' : 'Inactive'}
-                        </button>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                        <button onClick={() => openEditModal(model)} className="text-blue-600 hover:text-blue-800">Edit</button>
-                        <button onClick={() => handleDelete(model)} className="text-red-600 hover:text-red-800">Delete</button>
-                      </td>
-                    </tr>
-                  ))
-                )}
+                        </Badge>
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button size="sm" variant="ghost" onClick={() => openEditModal(model)}>
+                          Edit
+                        </Button>
+                        <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(model)}>
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
+      )}
 
-        {/* Create/Edit Modal */}
-        {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                {editingModel ? 'Edit Model' : 'Add New Model'}
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
-                  <input type="text" value={formData.display_name}
-                    onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="claude-sonnet-4-5" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Provider Base URL</label>
-                  <input type="text" value={formData.provider_base_url}
-                    onChange={(e) => setFormData({ ...formData, provider_base_url: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="https://api.anthropic.com" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Provider Token {editingModel && '(leave empty to keep existing)'}
-                  </label>
-                  <input type="password" value={formData.provider_token}
-                    onChange={(e) => setFormData({ ...formData, provider_token: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="sk-..." />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Provider Model</label>
-                  <input type="text" value={formData.provider_model}
-                    onChange={(e) => setFormData({ ...formData, provider_model: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="claude-sonnet-4-20250514" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Input Price ($/token)</label>
-                    <input type="number" step="0.000001" value={formData.pricing_input}
-                      onChange={(e) => setFormData({ ...formData, pricing_input: parseFloat(e.target.value) || 0 })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Output Price ($/token)</label>
-                    <input type="number" step="0.000001" value={formData.pricing_output}
-                      onChange={(e) => setFormData({ ...formData, pricing_output: parseFloat(e.target.value) || 0 })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2" />
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <input type="checkbox" id="is_active" checked={formData.is_active}
-                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-                  <label htmlFor="is_active" className="ml-2 text-sm text-gray-700">Active</label>
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end space-x-3">
-                <button onClick={() => { setShowModal(false); resetForm(); }}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
-                <button onClick={handleSubmit}
-                  disabled={!formData.display_name || !formData.provider_base_url || !formData.provider_model || (!editingModel && !formData.provider_token)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:opacity-50">
-                  {editingModel ? 'Update' : 'Create'}
-                </button>
-              </div>
-            </div>
+      {/* Create/Edit Modal */}
+      <Modal
+        isOpen={showModal}
+        onClose={() => { setShowModal(false); resetForm(); }}
+        title={editingModel ? 'Edit Model' : 'Add New Model'}
+        description={editingModel ? 'Update the model configuration.' : 'Configure a new shadow model.'}
+        size="lg"
+      >
+        <div className="space-y-4">
+          <Input
+            label="Display Name"
+            value={formData.display_name}
+            onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+            placeholder="claude-sonnet-4-5"
+            required
+          />
+          <Input
+            label="Provider Base URL"
+            value={formData.provider_base_url}
+            onChange={(e) => setFormData({ ...formData, provider_base_url: e.target.value })}
+            placeholder="https://api.anthropic.com"
+            required
+          />
+          <Input
+            label={editingModel ? 'Provider Token (leave empty to keep existing)' : 'Provider Token'}
+            type="password"
+            value={formData.provider_token}
+            onChange={(e) => setFormData({ ...formData, provider_token: e.target.value })}
+            placeholder="sk-..."
+            required={!editingModel}
+          />
+          <Input
+            label="Provider Model"
+            value={formData.provider_model}
+            onChange={(e) => setFormData({ ...formData, provider_model: e.target.value })}
+            placeholder="claude-sonnet-4-20250514"
+            required
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Input Price ($/token)"
+              type="number"
+              step={0.000001}
+              value={formData.pricing_input}
+              onChange={(e) => setFormData({ ...formData, pricing_input: parseFloat(e.target.value) || 0 })}
+            />
+            <Input
+              label="Output Price ($/token)"
+              type="number"
+              step={0.000001}
+              value={formData.pricing_output}
+              onChange={(e) => setFormData({ ...formData, pricing_output: parseFloat(e.target.value) || 0 })}
+            />
           </div>
-        )}
-      </main>
-    </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="is_active"
+              checked={formData.is_active}
+              onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+              className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+            />
+            <label htmlFor="is_active" className="ml-2 text-sm text-gray-700">Active</label>
+          </div>
+        </div>
+        <ModalFooter>
+          <Button variant="secondary" onClick={() => { setShowModal(false); resetForm(); }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={!formData.display_name || !formData.provider_base_url || !formData.provider_model || (!editingModel && !formData.provider_token)}
+          >
+            {editingModel ? 'Update' : 'Create'}
+          </Button>
+        </ModalFooter>
+      </Modal>
+    </Layout>
   );
 }
 

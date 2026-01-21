@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import { Layout } from '../components/layout';
+import { Card, Button, Spinner } from '../components/ui';
 import { creditService } from '../services/creditService';
 import { apiKeyService } from '../services/apiKeyService';
 import { usageService } from '../services/usageService';
@@ -31,119 +32,123 @@ export default function Dashboard() {
     loadData();
   }, []);
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h2>
-
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Credit Balance Card */}
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Credit Balance</dt>
-                    <dd className="text-lg font-semibold text-gray-900">
-                      {loading ? '...' : `$${balance.toFixed(4)}`}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-50 px-5 py-3">
-              <Link to="/credits" className="text-sm font-medium text-blue-600 hover:text-blue-800">
-                View details →
-              </Link>
-            </div>
+  const StatCard = ({
+    icon,
+    label,
+    value,
+    link,
+    linkText,
+    iconBg = 'bg-primary-100',
+    iconColor = 'text-primary-600'
+  }: {
+    icon: React.ReactNode;
+    label: string;
+    value: string | number;
+    link: string;
+    linkText: string;
+    iconBg?: string;
+    iconColor?: string;
+  }) => (
+    <Card padding="none" className="overflow-hidden hover:shadow-md transition-shadow">
+      <div className="p-6">
+        <div className="flex items-center">
+          <div className={`flex-shrink-0 w-12 h-12 ${iconBg} rounded-xl flex items-center justify-center`}>
+            <div className={iconColor}>{icon}</div>
           </div>
-
-          {/* API Keys Card */}
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Active API Keys</dt>
-                    <dd className="text-lg font-semibold text-gray-900">
-                      {loading ? '...' : apiKeyCount}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-50 px-5 py-3">
-              <Link to="/api-keys" className="text-sm font-medium text-blue-600 hover:text-blue-800">
-                Manage keys →
-              </Link>
-            </div>
-          </div>
-
-          {/* Usage Card */}
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Requests</dt>
-                    <dd className="text-lg font-semibold text-gray-900">
-                      {loading ? '...' : totalRequests.toLocaleString()}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-50 px-5 py-3">
-              <Link to="/usage" className="text-sm font-medium text-blue-600 hover:text-blue-800">
-                View analytics →
-              </Link>
-            </div>
+          <div className="ml-4 flex-1">
+            <p className="text-sm font-medium text-gray-500">{label}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {loading ? <Spinner size="sm" /> : value}
+            </p>
           </div>
         </div>
+      </div>
+      <div className="bg-gray-50 px-6 py-3 border-t border-gray-100">
+        <Link to={link} className="text-sm font-medium text-primary-600 hover:text-primary-700 inline-flex items-center group">
+          {linkText}
+          <svg className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+      </div>
+    </Card>
+  );
 
-        {/* Quick Actions */}
-        <div className="mt-8">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-          <div className="flex space-x-4">
-            <Link
-              to="/api-keys"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+  return (
+    <Layout>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p className="mt-1 text-sm text-gray-500">Welcome back! Here's an overview of your account.</p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard
+          icon={
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
+          label="Credit Balance"
+          value={`$${balance.toFixed(4)}`}
+          link="/credits"
+          linkText="View details"
+          iconBg="bg-emerald-100"
+          iconColor="text-emerald-600"
+        />
+
+        <StatCard
+          icon={
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+          }
+          label="Active API Keys"
+          value={apiKeyCount}
+          link="/api-keys"
+          linkText="Manage keys"
+          iconBg="bg-primary-100"
+          iconColor="text-primary-600"
+        />
+
+        <StatCard
+          icon={
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          }
+          label="Total Requests"
+          value={totalRequests.toLocaleString()}
+          link="/usage"
+          linkText="View analytics"
+          iconBg="bg-amber-100"
+          iconColor="text-amber-600"
+        />
+      </div>
+
+      {/* Quick Actions */}
+      <div className="mt-10">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="flex flex-wrap gap-3">
+          <Link to="/api-keys">
+            <Button
+              leftIcon={
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              }
             >
               Create API Key
-            </Link>
-            <Link
-              to="/usage"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
-              View Usage
-            </Link>
-            <Link
-              to="/credits"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
-              View Credits
-            </Link>
-          </div>
+            </Button>
+          </Link>
+          <Link to="/usage">
+            <Button variant="outline">View Usage</Button>
+          </Link>
+          <Link to="/credits">
+            <Button variant="outline">View Credits</Button>
+          </Link>
         </div>
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 }
 
