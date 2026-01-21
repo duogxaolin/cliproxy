@@ -1,13 +1,27 @@
 import { Layout } from '../../components/layout';
 import { Card } from '../../components/ui';
 
-// CLI Proxy URL - from localStorage (admin setting) or environment variable
+// Auto-detect CLI Proxy URL based on current window location
+const getDefaultCliProxyUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname } = window.location;
+    return `${protocol}//${hostname}:4569`;
+  }
+  return 'http://localhost:4569';
+};
+
+// CLI Proxy URL - from localStorage (admin setting), environment variable, or auto-detect
 const getCliProxyUrl = (): string => {
   const savedUrl = localStorage.getItem('cli_proxy_url');
   if (savedUrl) {
     return savedUrl;
   }
-  return import.meta.env.VITE_CLI_PROXY_URL || 'http://localhost:4569';
+  // Use env variable if set and not localhost, otherwise auto-detect
+  const envUrl = import.meta.env.VITE_CLI_PROXY_URL;
+  if (envUrl && !envUrl.includes('localhost')) {
+    return envUrl;
+  }
+  return getDefaultCliProxyUrl();
 };
 
 export default function CliProxyPage() {
