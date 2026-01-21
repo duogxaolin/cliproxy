@@ -105,6 +105,19 @@ export interface UpdateModelData {
   is_active?: boolean;
 }
 
+// Convert snake_case to camelCase for backend API
+const toBackendModelData = (data: CreateModelData | UpdateModelData) => {
+  const result: Record<string, unknown> = {};
+  if ('display_name' in data && data.display_name !== undefined) result.displayName = data.display_name;
+  if ('provider_base_url' in data && data.provider_base_url !== undefined) result.providerBaseUrl = data.provider_base_url;
+  if ('provider_token' in data && data.provider_token !== undefined) result.providerToken = data.provider_token;
+  if ('provider_model' in data && data.provider_model !== undefined) result.providerModel = data.provider_model;
+  if ('pricing_input' in data && data.pricing_input !== undefined) result.pricingInput = data.pricing_input;
+  if ('pricing_output' in data && data.pricing_output !== undefined) result.pricingOutput = data.pricing_output;
+  if ('is_active' in data && data.is_active !== undefined) result.isActive = data.is_active;
+  return result;
+};
+
 export interface SystemSetting {
   id: string;
   key: string;
@@ -198,12 +211,12 @@ export const adminService = {
   },
 
   async createModel(data: CreateModelData): Promise<ShadowModel> {
-    const response = await api.post<ShadowModel>('/api/admin/models', data);
+    const response = await api.post<ShadowModel>('/api/admin/models', toBackendModelData(data));
     return response.data;
   },
 
   async updateModel(id: string, data: UpdateModelData): Promise<ShadowModel> {
-    const response = await api.put<ShadowModel>(`/api/admin/models/${id}`, data);
+    const response = await api.put<ShadowModel>(`/api/admin/models/${id}`, toBackendModelData(data));
     return response.data;
   },
 
