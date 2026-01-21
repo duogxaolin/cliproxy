@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import prisma from './utils/prisma';
 import authRoutes from './routes/auth.routes';
+import adminRoutes from './routes/admin.routes';
+import proxyRoutes from './routes/proxy.routes';
 
 dotenv.config();
 
@@ -30,6 +32,12 @@ app.get('/api', (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// Admin routes
+app.use('/api/admin', adminRoutes);
+
+// Proxy routes (API v1)
+app.use('/api/v1', proxyRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
