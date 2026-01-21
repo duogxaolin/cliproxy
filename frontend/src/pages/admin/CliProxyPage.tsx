@@ -1,6 +1,9 @@
 import { Layout } from '../../components/layout';
 import { Card } from '../../components/ui';
 
+// CLI Proxy URL - configurable via environment variable
+const CLI_PROXY_URL = import.meta.env.VITE_CLI_PROXY_URL || 'http://103.77.173.186:3000/cliproxy/control-panel';
+
 export default function CliProxyPage() {
   return (
     <Layout>
@@ -11,7 +14,7 @@ export default function CliProxyPage() {
 
       <Card padding="none" className="overflow-hidden" style={{ height: 'calc(100vh - 220px)' }}>
         <iframe
-          src="http://103.77.173.186:3000/cliproxy/control-panel"
+          src={CLI_PROXY_URL}
           className="w-full h-full border-0"
           title="CLI Proxy Control Panel"
           sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
