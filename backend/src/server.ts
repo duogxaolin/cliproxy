@@ -8,6 +8,7 @@ import adminRoutes from './routes/admin.routes';
 import proxyRoutes from './routes/proxy.routes';
 import apiKeyRoutes from './routes/apiKey.routes';
 import userRoutes from './routes/user.routes';
+import publicRoutes from './routes/public.routes';
 
 dotenv.config();
 
@@ -61,6 +62,9 @@ app.get('/api', (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// Public routes (no auth required)
+app.use('/api/public', publicRoutes);
 
 // User routes
 app.use('/api/users', userRoutes);

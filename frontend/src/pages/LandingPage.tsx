@@ -1,6 +1,13 @@
 import { Link } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
 
 export default function LandingPage() {
+  const { isAuthenticated, user, logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -15,19 +22,62 @@ export default function LandingPage() {
               </div>
               <span className="text-xl font-bold text-gray-900">API Marketplace</span>
             </div>
+
+            {/* Navigation Links */}
+            <div className="hidden md:flex items-center space-x-6">
+              <Link to="/models" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors">
+                Models & Pricing
+              </Link>
+              <Link to="/guides" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors">
+                Guides
+              </Link>
+            </div>
+
+            {/* Auth Section */}
             <div className="flex items-center space-x-4">
-              <Link
-                to="/login"
-                className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors"
-              >
-                Sign in
-              </Link>
-              <Link
-                to="/register"
-                className="bg-primary-600 text-white hover:bg-primary-700 px-5 py-2.5 rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow-md"
-              >
-                Get Started
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
+                        <span className="text-white text-sm font-medium">
+                          {user?.username?.charAt(0).toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                      <span className="hidden sm:block text-sm font-medium text-gray-700">
+                        {user?.username}
+                      </span>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="text-gray-500 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="bg-primary-600 text-white hover:bg-primary-700 px-5 py-2.5 rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow-md"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -245,26 +295,56 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnY0em0wLTZ2LTRoLTJ2NGgyem0tNiA2aC00djJoNHYtMnptMC02aC00djJoNHYtMnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20" />
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-            Ready to get started?
-          </h2>
-          <p className="text-xl text-primary-100 mb-10 max-w-2xl mx-auto">
-            Create your account today and start accessing powerful AI models through our unified API.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              to="/register"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-white text-primary-700 rounded-xl text-base font-semibold hover:bg-gray-50 transition-all shadow-lg"
-            >
-              Create Free Account
-            </Link>
-            <Link
-              to="/login"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-primary-500/20 text-white rounded-xl text-base font-semibold border border-white/20 hover:bg-primary-500/30 transition-all"
-            >
-              Sign In
-            </Link>
-          </div>
+          {isAuthenticated ? (
+            <>
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+                Welcome back, {user?.username}!
+              </h2>
+              <p className="text-xl text-primary-100 mb-10 max-w-2xl mx-auto">
+                Continue using our powerful AI models through your dashboard.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  to="/dashboard"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-white text-primary-700 rounded-xl text-base font-semibold hover:bg-gray-50 transition-all shadow-lg"
+                >
+                  Go to Dashboard
+                  <svg className="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+                <Link
+                  to="/api-keys"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-primary-500/20 text-white rounded-xl text-base font-semibold border border-white/20 hover:bg-primary-500/30 transition-all"
+                >
+                  Manage API Keys
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+                Ready to get started?
+              </h2>
+              <p className="text-xl text-primary-100 mb-10 max-w-2xl mx-auto">
+                Create your account today and start accessing powerful AI models through our unified API.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  to="/register"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-white text-primary-700 rounded-xl text-base font-semibold hover:bg-gray-50 transition-all shadow-lg"
+                >
+                  Create Free Account
+                </Link>
+                <Link
+                  to="/login"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-primary-500/20 text-white rounded-xl text-base font-semibold border border-white/20 hover:bg-primary-500/30 transition-all"
+                >
+                  Sign In
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </section>
 

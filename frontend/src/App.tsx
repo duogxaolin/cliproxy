@@ -6,11 +6,14 @@ import Dashboard from './pages/Dashboard';
 import ApiKeysPage from './pages/ApiKeysPage';
 import CreditsPage from './pages/CreditsPage';
 import UsagePage from './pages/UsagePage';
+import ModelsPage from './pages/ModelsPage';
+import GuidesPage from './pages/GuidesPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UsersPage from './pages/admin/UsersPage';
-import ModelsPage from './pages/admin/ModelsPage';
+import AdminModelsPage from './pages/admin/ModelsPage';
 import CliProxyPage from './pages/admin/CliProxyPage';
 import SettingsPage from './pages/admin/SettingsPage';
+import BlogPage from './pages/admin/BlogPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -21,6 +24,9 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/models" element={<ModelsPage />} />
+        <Route path="/guides" element={<GuidesPage />} />
+        <Route path="/guides/:slug" element={<GuidesPage />} />
 
         {/* Protected user routes */}
         <Route
@@ -77,7 +83,7 @@ function App() {
           path="/admin/models"
           element={
             <ProtectedRoute requiredRole="admin">
-              <ModelsPage />
+              <AdminModelsPage />
             </ProtectedRoute>
           }
         />
@@ -97,10 +103,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admin/blog"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <BlogPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   );
 }
 
 export default App;
-

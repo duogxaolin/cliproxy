@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { shadowModelController } from '../controllers/shadowModel.controller';
 import { adminController } from '../controllers/admin.controller';
 import { settingsController } from '../controllers';
+import { blogController } from '../controllers/blog.controller';
 import { authenticateJWT, requireRole } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -62,6 +63,15 @@ router.post('/settings', settingsController.createSetting.bind(settingsControlle
 router.post('/settings/bulk', settingsController.bulkUpsertSettings.bind(settingsController));
 router.put('/settings/:key', settingsController.updateSetting.bind(settingsController));
 router.delete('/settings/:key', settingsController.deleteSetting.bind(settingsController));
+
+// ===========================================
+// Blog/Guide Management Routes
+// ===========================================
+router.get('/posts', (req, res) => blogController.getAllPosts(req, res));
+router.get('/posts/:id', (req, res) => blogController.getPost(req, res));
+router.post('/posts', (req, res) => blogController.createPost(req, res));
+router.put('/posts/:id', (req, res) => blogController.updatePost(req, res));
+router.delete('/posts/:id', (req, res) => blogController.deletePost(req, res));
 
 export default router;
 

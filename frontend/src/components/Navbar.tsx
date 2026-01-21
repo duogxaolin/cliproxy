@@ -71,6 +71,9 @@ export default function Navbar() {
                   <Link to="/admin/cliproxy" className={linkClass('/admin/cliproxy')}>
                     CLI Proxy
                   </Link>
+                  <Link to="/admin/blog" className={linkClass('/admin/blog')}>
+                    Blog
+                  </Link>
                   <Link to="/admin/settings" className={linkClass('/admin/settings')}>
                     Settings
                   </Link>
@@ -158,6 +161,9 @@ export default function Navbar() {
                 </Link>
                 <Link to="/admin/cliproxy" className={mobileLinkClass('/admin/cliproxy')} onClick={() => setMobileMenuOpen(false)}>
                   CLI Proxy
+                </Link>
+                <Link to="/admin/blog" className={mobileLinkClass('/admin/blog')} onClick={() => setMobileMenuOpen(false)}>
+                  Blog
                 </Link>
                 <Link to="/admin/settings" className={mobileLinkClass('/admin/settings')} onClick={() => setMobileMenuOpen(false)}>
                   Settings
