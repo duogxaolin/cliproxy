@@ -2,10 +2,25 @@ import { useState, useEffect } from 'react';
 import { Layout } from '../../components/layout';
 import { Card, Button, Input, Modal, Badge, Spinner } from '../../components/ui';
 import { adminService, SystemSetting, CreateSettingInput } from '../../services/adminService';
-import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon, Cog6ToothIcon, ServerIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import { setApiBaseUrl, getApiBaseUrl } from '../../services/api';
+import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon, Cog6ToothIcon, ServerIcon, GlobeAltIcon, LinkIcon } from '@heroicons/react/24/outline';
 
 type Category = 'environment' | 'connection' | 'system';
 type DataType = 'string' | 'number' | 'boolean' | 'json';
+
+// Special settings that are stored in localStorage and affect the app immediately
+const SPECIAL_SETTINGS = {
+  API_BASE_URL: {
+    localStorageKey: 'api_base_url',
+    description: 'Backend API URL (changes take effect immediately)',
+    defaultValue: () => getApiBaseUrl(),
+  },
+  CLI_PROXY_URL: {
+    localStorageKey: 'cli_proxy_url',
+    description: 'CLI Proxy Control Panel URL',
+    defaultValue: () => localStorage.getItem('cli_proxy_url') || import.meta.env.VITE_CLI_PROXY_URL || 'http://localhost:4569',
+  },
+};
 
 const CATEGORIES: { value: Category; label: string; icon: React.ReactNode; description: string }[] = [
   { value: 'environment', label: 'Environment Variables', icon: <GlobeAltIcon className="w-5 h-5" />, description: 'Global environment variables and feature flags' },
@@ -31,6 +46,12 @@ export default function SettingsPage() {
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Special URL settings state (stored in localStorage)
+  const [apiBaseUrl, setApiBaseUrlState] = useState(SPECIAL_SETTINGS.API_BASE_URL.defaultValue());
+  const [cliProxyUrl, setCliProxyUrlState] = useState(SPECIAL_SETTINGS.CLI_PROXY_URL.defaultValue());
+  const [savingUrls, setSavingUrls] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState<CreateSettingInput>({
@@ -45,6 +66,45 @@ export default function SettingsPage() {
   useEffect(() => {
     loadSettings();
   }, [activeCategory]);
+
+  // Save URL settings to localStorage
+  const handleSaveUrlSettings = () => {
+    setSavingUrls(true);
+    try {
+      // Save API Base URL
+      if (apiBaseUrl) {
+        setApiBaseUrl(apiBaseUrl);
+      }
+      // Save CLI Proxy URL
+      if (cliProxyUrl) {
+        localStorage.setItem('cli_proxy_url', cliProxyUrl);
+      }
+      setSuccessMessage('URL settings saved successfully! API URL changes take effect immediately.');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError('Failed to save URL settings');
+    } finally {
+      setSavingUrls(false);
+    }
+  };
+
+  // Reset URL settings to defaults
+  const handleResetUrlSettings = () => {
+    const defaultApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4567';
+    const defaultCliProxyUrl = import.meta.env.VITE_CLI_PROXY_URL || 'http://localhost:4569';
+
+    setApiBaseUrlState(defaultApiUrl);
+    setCliProxyUrlState(defaultCliProxyUrl);
+
+    localStorage.removeItem('api_base_url');
+    localStorage.removeItem('cli_proxy_url');
+
+    // Reset axios baseURL
+    setApiBaseUrl(defaultApiUrl);
+
+    setSuccessMessage('URL settings reset to defaults');
+    setTimeout(() => setSuccessMessage(null), 3000);
+  };
 
   const loadSettings = async () => {
     try {
@@ -159,6 +219,66 @@ export default function SettingsPage() {
           <button onClick={() => setError(null)} className="ml-2 text-red-500 hover:text-red-700">×</button>
         </div>
       )}
+
+      {successMessage && (
+        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+          {successMessage}
+          <button onClick={() => setSuccessMessage(null)} className="ml-2 text-green-500 hover:text-green-700">×</button>
+        </div>
+      )}
+
+      {/* URL Settings Card - Always visible at top */}
+      <Card className="mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <LinkIcon className="w-5 h-5 text-blue-600" />
+          <h2 className="text-lg font-semibold text-gray-900">URL Configuration</h2>
+          <Badge color="blue" size="sm">Browser Storage</Badge>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          These settings are stored in your browser and take effect immediately. Use this to connect to different backend servers or CLI proxy instances.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              API Base URL
+              <span className="ml-2 text-xs text-gray-400">(Backend server)</span>
+            </label>
+            <input
+              type="url"
+              value={apiBaseUrl}
+              onChange={(e) => setApiBaseUrlState(e.target.value)}
+              placeholder="http://localhost:4567"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+            />
+            <p className="mt-1 text-xs text-gray-400">Example: http://api.yourdomain.com or http://103.77.173.186:4567</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              CLI Proxy URL
+              <span className="ml-2 text-xs text-gray-400">(Control panel iframe)</span>
+            </label>
+            <input
+              type="url"
+              value={cliProxyUrl}
+              onChange={(e) => setCliProxyUrlState(e.target.value)}
+              placeholder="http://localhost:4569"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+            />
+            <p className="mt-1 text-xs text-gray-400">Example: http://cliproxy.yourdomain.com or http://103.77.173.186:4569</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button onClick={handleSaveUrlSettings} disabled={savingUrls}>
+            {savingUrls ? <Spinner size="sm" /> : 'Save URL Settings'}
+          </Button>
+          <Button variant="secondary" onClick={handleResetUrlSettings}>
+            Reset to Defaults
+          </Button>
+          <span className="text-xs text-gray-400 ml-2">
+            Current API: <code className="bg-gray-100 px-1 rounded">{getApiBaseUrl()}</code>
+          </span>
+        </div>
+      </Card>
 
       {/* Category Tabs */}
       <div className="mb-6">

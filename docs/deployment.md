@@ -130,21 +130,23 @@ docker-compose exec backend npx prisma db push
 docker-compose logs -f
 
 # Kiểm tra health
-curl http://103.77.173.186/health
+curl http://103.77.173.186:4567/health
 
 # Kiểm tra API
-curl http://103.77.173.186/api/health
+curl http://103.77.173.186:4567/api/health
 ```
 
 ### Step 9: Truy cập Website
-- **Frontend**: http://103.77.173.186
-- **API**: http://103.77.173.186/api
-- **Admin Panel**: http://103.77.173.186/admin (sau khi đăng nhập admin)
+- **Frontend**: http://103.77.173.186:4568
+- **API**: http://103.77.173.186:4567/api
+- **Admin Panel**: http://103.77.173.186:4568/admin (sau khi đăng nhập admin)
+- **Admin Settings**: http://103.77.173.186:4568/admin/settings (cấu hình URL)
 
 ### Step 10: Tạo Admin User
-1. Truy cập http://103.77.173.186/register
+1. Truy cập http://103.77.173.186:4568/register
 2. Đăng ký tài khoản đầu tiên (sẽ tự động là admin nếu `FIRST_USER_IS_ADMIN=true`)
 3. Đăng nhập và truy cập Admin Dashboard
+4. Vào **Settings** để cấu hình API URL và CLI Proxy URL nếu cần
 
 ---
 
@@ -188,9 +190,8 @@ docker-compose exec backend npx prisma migrate reset
 
 | Service | Port | Description |
 |---------|------|-------------|
-| nginx | 80, 443 | Reverse proxy |
-| frontend | 3001 | React app |
-| backend | 3000 | Express API |
+| frontend | 4568 | React app |
+| backend | 4567 | Express API |
 | postgres | 5432 | Database |
 | redis | 6379 | Cache |
 

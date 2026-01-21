@@ -1,9 +1,28 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// Get API URL from localStorage (set by admin) or fallback to env/default
+const getApiUrl = (): string => {
+  const savedApiUrl = localStorage.getItem('api_base_url');
+  if (savedApiUrl) {
+    return savedApiUrl;
+  }
+  return import.meta.env.VITE_API_URL || 'http://localhost:4567';
+};
+
+// Export function to update API URL dynamically
+export const setApiBaseUrl = (url: string): void => {
+  localStorage.setItem('api_base_url', url);
+  // Update axios baseURL
+  api.defaults.baseURL = url;
+};
+
+// Export function to get current API URL
+export const getApiBaseUrl = (): string => {
+  return api.defaults.baseURL || getApiUrl();
+};
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: getApiUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -37,7 +56,7 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken) {
         try {
-          const response = await axios.post(`${API_URL}/api/auth/refresh`, {
+          const response = await axios.post(`${getApiUrl()}/api/auth/refresh`, {
             refreshToken,
           });
 
