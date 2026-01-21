@@ -1,6 +1,15 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
 
 export default function Dashboard() {
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b border-gray-200">
@@ -10,13 +19,20 @@ export default function Dashboard() {
               <h1 className="text-xl font-bold text-gray-900">API Marketplace</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Welcome, User</span>
-              <Link
-                to="/login"
+              <span className="text-sm text-gray-600">
+                Welcome, {user?.username || 'User'}
+                {user?.role === 'admin' && (
+                  <span className="ml-2 px-2 py-0.5 text-xs bg-primary-100 text-primary-800 rounded-full">
+                    Admin
+                  </span>
+                )}
+              </span>
+              <button
+                onClick={handleLogout}
                 className="text-gray-600 hover:text-gray-900 text-sm font-medium"
               >
                 Logout
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -24,7 +40,7 @@ export default function Dashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h2>
-        
+
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {/* Credit Balance Card */}
           <div className="bg-white overflow-hidden shadow rounded-lg">

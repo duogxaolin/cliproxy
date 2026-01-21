@@ -1,4 +1,2 @@
-// Middleware placeholder
-// Will be implemented in Phase 2+
-export {};
+export { authenticateJWT, authenticateApiKey, requireRole } from './auth.middleware';
 

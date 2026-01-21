@@ -1,4 +1,2 @@
-// Components placeholder
-// Will be implemented in Phase 2+
-export {};
+export { default as ProtectedRoute } from './ProtectedRoute';
 

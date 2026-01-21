@@ -1,6 +1,8 @@
 import { Request } from 'express';
 import { UserRole, UserStatus } from '@prisma/client';
 
+export * from './auth.types';
+
 export interface JwtPayload {
   userId: string;
   email: string;

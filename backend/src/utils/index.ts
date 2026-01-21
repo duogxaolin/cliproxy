@@ -1,10 +1,15 @@
 import { PaginationParams } from '../types';
 
+export { hashPassword, verifyPassword } from './password';
+export { generateToken, verifyToken, generateRefreshToken, verifyRefreshToken } from './jwt';
+export { generateApiKey, hashApiKey, verifyApiKey } from './apiKey';
+export { default as prisma } from './prisma';
+
 export function getPaginationParams(query: { page?: string; limit?: string }): PaginationParams {
   const page = Math.max(1, parseInt(query.page || '1', 10));
   const limit = Math.min(100, Math.max(1, parseInt(query.limit || '20', 10)));
   const offset = (page - 1) * limit;
-  
+
   return { page, limit, offset };
 }
 

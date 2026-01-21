@@ -1,4 +1,2 @@
-// Auth controller placeholder
-// Will be implemented in Phase 2
-export {};
+export { authController, AuthController } from './auth.controller';
 
