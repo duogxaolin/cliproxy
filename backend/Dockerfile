@@ -1,12 +1,12 @@
 # ===========================================
 # Stage 1: Build
 # ===========================================
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
 # Install OpenSSL for Prisma
-RUN apk add --no-cache openssl openssl-dev
+RUN apt-get update && apt-get install -y openssl libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
 COPY package*.json ./
@@ -25,16 +25,16 @@ RUN npm run build
 # ===========================================
 # Stage 2: Production
 # ===========================================
-FROM node:20-alpine AS production
+FROM node:20-slim AS production
 
 WORKDIR /app
 
 # Install OpenSSL for Prisma (required at runtime)
-RUN apk add --no-cache openssl
+RUN apt-get update && apt-get install -y openssl ca-certificates wget && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+RUN groupadd -g 1001 nodejs && \
+    useradd -u 1001 -g nodejs -s /bin/bash nodejs
 
 # Install only production dependencies
 COPY package*.json ./
