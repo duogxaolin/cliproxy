@@ -104,7 +104,10 @@ export default function ModelsPage() {
     }
   };
 
-  const formatPrice = (price: number) => `$${price.toFixed(6)}/token`;
+  const formatPrice = (price: number | string | undefined | null) => {
+    const numPrice = typeof price === 'string' ? parseFloat(price) : (price ?? 0);
+    return `$${(numPrice || 0).toFixed(6)}/token`;
+  };
 
   return (
     <Layout>
