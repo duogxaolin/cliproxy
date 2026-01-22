@@ -64,16 +64,16 @@ export class ProxyService {
     let responseData: any;
     let statusCode: number;
 
-    // Detect provider type from URL
-    const isAnthropic = model.providerBaseUrl.includes('anthropic.com');
-    const isOpenAI = model.providerBaseUrl.includes('openai.com');
+    // Detect provider type from URL path
+    const isAnthropicFormat = model.providerBaseUrl.includes('/messages');
+    const isOpenAIFormat = model.providerBaseUrl.includes('/chat/completions');
 
-    // Build headers based on provider
+    // Build headers based on provider format
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
 
-    if (isAnthropic) {
+    if (isAnthropicFormat) {
       headers['x-api-key'] = model.providerToken;
       headers['anthropic-version'] = '2023-06-01';
     } else {
@@ -193,15 +193,15 @@ export class ProxyService {
       stream: true,
     };
 
-    // Detect provider type from URL
-    const isAnthropic = model.providerBaseUrl.includes('anthropic.com');
+    // Detect provider type from URL path
+    const isAnthropicFormat = model.providerBaseUrl.includes('/messages');
 
-    // Build headers based on provider
+    // Build headers based on provider format
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
 
-    if (isAnthropic) {
+    if (isAnthropicFormat) {
       headers['x-api-key'] = model.providerToken;
       headers['anthropic-version'] = '2023-06-01';
     } else {
