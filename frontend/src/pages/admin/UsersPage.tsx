@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AdminLayout } from '../../components/layout';
+import { UserLayout } from '../../components/layout';
 import { Card, Button, Input, Badge, Spinner, Modal, ModalFooter } from '../../components/ui';
 import { adminService, AdminUser } from '../../services/adminService';
 
@@ -65,7 +65,7 @@ export default function UsersPage() {
   const formatCost = (cost: number) => `$${cost.toFixed(4)}`;
 
   return (
-    <AdminLayout>
+    <UserLayout>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
         <p className="mt-1 text-sm text-gray-500">Manage users, grant credits, and control access.</p>
@@ -229,7 +229,7 @@ export default function UsersPage() {
           </Button>
         </ModalFooter>
       </Modal>
-    </AdminLayout>
+    </UserLayout>
   );
 }
 

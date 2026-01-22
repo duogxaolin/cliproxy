@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { AdminLayout } from '../../components/layout';
+import { UserLayout } from '../../components/layout';
 import { Card, Button, Input, Badge, Spinner, Modal, ModalFooter } from '../../components/ui';
 import { Editor } from '@tinymce/tinymce-react';
 
@@ -141,7 +141,7 @@ export default function BlogPage() {
   const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString();
 
   return (
-    <AdminLayout>
+    <UserLayout>
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Blog Management</h1>
@@ -271,6 +271,6 @@ export default function BlogPage() {
           </Button>
         </ModalFooter>
       </Modal>
-    </AdminLayout>
+    </UserLayout>
   );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AdminLayout } from '../../components/layout';
+import { UserLayout } from '../../components/layout';
 import { Card, Button, Spinner } from '../../components/ui';
 import { adminService, PlatformStats, UsageTrend, UserAnalytics, ModelAnalytics } from '../../services/adminService';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
@@ -65,7 +65,7 @@ export default function AdminDashboard() {
   );
 
   return (
-    <AdminLayout>
+    <UserLayout>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
@@ -242,7 +242,7 @@ export default function AdminDashboard() {
           </Card>
         </Link>
       </div>
-    </AdminLayout>
+    </UserLayout>
   );
 }
 
