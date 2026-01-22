@@ -64,14 +64,27 @@ export class ProxyService {
     let responseData: any;
     let statusCode: number;
 
+    // Detect provider type from URL
+    const isAnthropic = model.providerBaseUrl.includes('anthropic.com');
+    const isOpenAI = model.providerBaseUrl.includes('openai.com');
+
+    // Build headers based on provider
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (isAnthropic) {
+      headers['x-api-key'] = model.providerToken;
+      headers['anthropic-version'] = '2023-06-01';
+    } else {
+      // OpenAI and other providers use Bearer token
+      headers['Authorization'] = `Bearer ${model.providerToken}`;
+    }
+
     try {
       response = await fetch(model.providerBaseUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${model.providerToken}`,
-          'x-api-key': model.providerToken,
-        },
+        headers,
         body: JSON.stringify(transformedBody),
       });
 
@@ -180,15 +193,26 @@ export class ProxyService {
       stream: true,
     };
 
+    // Detect provider type from URL
+    const isAnthropic = model.providerBaseUrl.includes('anthropic.com');
+
+    // Build headers based on provider
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (isAnthropic) {
+      headers['x-api-key'] = model.providerToken;
+      headers['anthropic-version'] = '2023-06-01';
+    } else {
+      headers['Authorization'] = `Bearer ${model.providerToken}`;
+    }
+
     let response: Response;
     try {
       response = await fetch(model.providerBaseUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${model.providerToken}`,
-          'x-api-key': model.providerToken,
-        },
+        headers,
         body: JSON.stringify(transformedBody),
       });
     } catch (error) {
