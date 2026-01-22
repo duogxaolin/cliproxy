@@ -98,6 +98,7 @@ model ShadowModel {
   providerBaseUrl String   @map("provider_base_url")
   providerToken   String   @map("provider_token")
   providerModel   String   @map("provider_model")
+  systemPrompt    String?  @map("system_prompt") @db.Text
   pricingInput    Decimal  @map("pricing_input") @db.Decimal(12, 8)
   pricingOutput   Decimal  @map("pricing_output") @db.Decimal(12, 8)
   isActive        Boolean  @default(true) @map("is_active")

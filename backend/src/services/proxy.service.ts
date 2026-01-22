@@ -59,6 +59,11 @@ export class ProxyService {
       model: model.providerModel,
     };
 
+    // Inject system prompt if configured
+    if (model.systemPrompt) {
+      transformedBody.messages = this.injectSystemPrompt(requestBody.messages, model.systemPrompt);
+    }
+
     // Make request to provider
     let response: Response;
     let responseData: any;
@@ -191,6 +196,11 @@ export class ProxyService {
       model: model.providerModel,
       stream: true,
     };
+
+    // Inject system prompt if configured
+    if (model.systemPrompt) {
+      transformedBody.messages = this.injectSystemPrompt(requestBody.messages, model.systemPrompt);
+    }
 
     // Build full endpoint URL - auto-detect and append path if needed
     const { fullUrl, isAnthropicFormat } = this.buildProviderUrl(model.providerBaseUrl);
@@ -334,6 +344,32 @@ export class ProxyService {
       response.model = originalModelName;
     }
     return response;
+  }
+
+  /**
+   * Inject system prompt into messages array
+   * - If first message is already a system message, prepend to its content
+   * - Otherwise, add a new system message at the beginning
+   */
+  private injectSystemPrompt(messages: any[], systemPrompt: string): any[] {
+    if (!messages || !Array.isArray(messages)) {
+      return [{ role: 'system', content: systemPrompt }];
+    }
+
+    const result = [...messages];
+
+    if (result.length > 0 && result[0].role === 'system') {
+      // Prepend to existing system message
+      result[0] = {
+        ...result[0],
+        content: `${systemPrompt}\n\n${result[0].content}`,
+      };
+    } else {
+      // Add new system message at the beginning
+      result.unshift({ role: 'system', content: systemPrompt });
+    }
+
+    return result;
   }
 
   /**

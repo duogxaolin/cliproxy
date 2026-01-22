@@ -7,6 +7,7 @@ export interface CreateShadowModelData {
   providerBaseUrl: string;
   providerToken: string;
   providerModel: string;
+  systemPrompt?: string;
   pricingInput: number;
   pricingOutput: number;
   isActive?: boolean;
@@ -17,6 +18,7 @@ export interface UpdateShadowModelData {
   providerBaseUrl?: string;
   providerToken?: string;
   providerModel?: string;
+  systemPrompt?: string;
   pricingInput?: number;
   pricingOutput?: number;
   isActive?: boolean;
@@ -46,6 +48,7 @@ export class ShadowModelService {
         providerBaseUrl: data.providerBaseUrl,
         providerToken: encrypt(data.providerToken),
         providerModel: data.providerModel,
+        systemPrompt: data.systemPrompt || null,
         pricingInput: data.pricingInput,
         pricingOutput: data.pricingOutput,
         isActive: data.isActive ?? true,

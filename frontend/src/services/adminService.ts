@@ -78,6 +78,7 @@ export interface ShadowModel {
   display_name: string;
   provider_base_url: string;
   provider_model: string;
+  system_prompt?: string;
   pricing_input: number;
   pricing_output: number;
   is_active: boolean;
@@ -90,6 +91,7 @@ export interface CreateModelData {
   provider_base_url: string;
   provider_token: string;
   provider_model: string;
+  system_prompt?: string;
   pricing_input: number;
   pricing_output: number;
   is_active?: boolean;
@@ -100,6 +102,7 @@ export interface UpdateModelData {
   provider_base_url?: string;
   provider_token?: string;
   provider_model?: string;
+  system_prompt?: string;
   pricing_input?: number;
   pricing_output?: number;
   is_active?: boolean;
@@ -112,6 +115,7 @@ const toBackendModelData = (data: CreateModelData | UpdateModelData) => {
   if ('provider_base_url' in data && data.provider_base_url !== undefined) result.providerBaseUrl = data.provider_base_url;
   if ('provider_token' in data && data.provider_token !== undefined) result.providerToken = data.provider_token;
   if ('provider_model' in data && data.provider_model !== undefined) result.providerModel = data.provider_model;
+  if ('system_prompt' in data && data.system_prompt !== undefined) result.systemPrompt = data.system_prompt;
   if ('pricing_input' in data && data.pricing_input !== undefined) result.pricingInput = data.pricing_input;
   if ('pricing_output' in data && data.pricing_output !== undefined) result.pricingOutput = data.pricing_output;
   if ('is_active' in data && data.is_active !== undefined) result.isActive = data.is_active;
@@ -125,6 +129,7 @@ interface BackendShadowModel {
   providerBaseUrl: string;
   providerModel: string;
   providerToken?: string;
+  systemPrompt?: string;
   pricingInput: number;
   pricingOutput: number;
   isActive: boolean;
@@ -137,6 +142,7 @@ const toFrontendModel = (model: BackendShadowModel): ShadowModel => ({
   display_name: model.displayName,
   provider_base_url: model.providerBaseUrl,
   provider_model: model.providerModel,
+  system_prompt: model.systemPrompt || undefined,
   pricing_input: typeof model.pricingInput === 'string' ? parseFloat(model.pricingInput) : (model.pricingInput ?? 0),
   pricing_output: typeof model.pricingOutput === 'string' ? parseFloat(model.pricingOutput) : (model.pricingOutput ?? 0),
   is_active: model.isActive,

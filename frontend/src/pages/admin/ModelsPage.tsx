@@ -15,6 +15,7 @@ export default function ModelsPage() {
     provider_base_url: '',
     provider_token: '',
     provider_model: '',
+    system_prompt: '',
     pricing_input: 0,
     pricing_output: 0,
     is_active: true,
@@ -47,6 +48,7 @@ export default function ModelsPage() {
       provider_base_url: '',
       provider_token: '',
       provider_model: '',
+      system_prompt: '',
       pricing_input: 0,
       pricing_output: 0,
       is_active: true,
@@ -67,6 +69,7 @@ export default function ModelsPage() {
       provider_base_url: model.provider_base_url,
       provider_token: '', // Don't show existing token
       provider_model: model.provider_model,
+      system_prompt: model.system_prompt || '',
       pricing_input: model.pricing_input,
       pricing_output: model.pricing_output,
       is_active: model.is_active,
@@ -339,6 +342,19 @@ export default function ModelsPage() {
             placeholder="claude-sonnet-4-20250514"
             required
           />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              System Prompt <span className="text-gray-400 font-normal">(optional)</span>
+            </label>
+            <textarea
+              value={formData.system_prompt || ''}
+              onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
+              placeholder="Enter system prompt to prepend to all requests..."
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-y"
+            />
+            <p className="mt-1 text-xs text-gray-500">This system prompt will be automatically prepended to all API requests using this model.</p>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="Input Price ($/token)"
