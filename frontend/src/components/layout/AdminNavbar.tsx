@@ -15,20 +15,6 @@ export default function AdminNavbar() {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const linkClass = (path: string) =>
-    `px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-      isActive(path)
-        ? 'bg-primary-50 text-primary-700'
-        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-    }`;
-
-  const mobileLinkClass = (path: string) =>
-    `block px-4 py-3 rounded-lg text-base font-medium transition-all ${
-      isActive(path)
-        ? 'bg-primary-50 text-primary-700'
-        : 'text-gray-600 hover:bg-gray-50'
-    }`;
-
   const handleLogout = async () => {
     await logout();
     window.location.href = '/login';
