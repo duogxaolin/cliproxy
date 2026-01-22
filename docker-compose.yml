@@ -59,6 +59,7 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 4567
+      BASE_URL: ${BASE_URL:-http://localhost:4567}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-api_marketplace}?schema=public
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
@@ -70,6 +71,8 @@ services:
       FIRST_USER_IS_ADMIN: ${FIRST_USER_IS_ADMIN:-true}
     ports:
       - "${BACKEND_PORT:-4567}:4567"
+    volumes:
+      - uploads_data:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -158,5 +161,7 @@ volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  uploads_data:
     driver: local
 
