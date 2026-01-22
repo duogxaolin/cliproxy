@@ -55,12 +55,6 @@ export default function TestApiPage() {
     }
   };
 
-  const getApiKey = (): string => {
-    if (customApiKey) return customApiKey;
-    const key = apiKeys.find(k => k.id === selectedKeyId);
-    return key ? `${key.key_prefix}...` : '';
-  };
-
   const handleTest = async () => {
     const apiKey = customApiKey || '';
     if (!apiKey && !selectedKeyId) {
