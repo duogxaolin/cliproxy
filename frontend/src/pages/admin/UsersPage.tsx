@@ -10,10 +10,13 @@ export default function UsersPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [showGrantModal, setShowGrantModal] = useState(false);
+  const [showCreditModal, setShowCreditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [grantAmount, setGrantAmount] = useState('');
-  const [grantDescription, setGrantDescription] = useState('');
+  const [creditAmount, setCreditAmount] = useState('');
+  const [creditDescription, setCreditDescription] = useState('');
+  const [creditAction, setCreditAction] = useState<'add' | 'deduct'>('add');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadUsers = async () => {
     setLoading(true);
@@ -32,17 +35,26 @@ export default function UsersPage() {
     loadUsers();
   }, [page, search, statusFilter]);
 
-  const handleGrantCredits = async () => {
-    if (!selectedUser || !grantAmount) return;
+  const handleCreditAction = async () => {
+    if (!selectedUser || !creditAmount) return;
+    setSubmitting(true);
+    setError(null);
     try {
-      await adminService.grantCredits(selectedUser.id, parseFloat(grantAmount), grantDescription || undefined);
-      setShowGrantModal(false);
+      const amount = parseFloat(creditAmount);
+      if (creditAction === 'add') {
+        await adminService.grantCredits(selectedUser.id, amount, creditDescription || undefined);
+      } else {
+        await adminService.deductCredits(selectedUser.id, amount, creditDescription || undefined);
+      }
+      setShowCreditModal(false);
       setSelectedUser(null);
-      setGrantAmount('');
-      setGrantDescription('');
+      setCreditAmount('');
+      setCreditDescription('');
       loadUsers();
-    } catch (err) {
-      console.error('Failed to grant credits:', err);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to update credits');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -57,9 +69,13 @@ export default function UsersPage() {
     }
   };
 
-  const openGrantModal = (user: AdminUser) => {
+  const openCreditModal = (user: AdminUser, action: 'add' | 'deduct') => {
     setSelectedUser(user);
-    setShowGrantModal(true);
+    setCreditAction(action);
+    setCreditAmount('');
+    setCreditDescription('');
+    setError(null);
+    setShowCreditModal(true);
   };
 
   const formatCost = (cost: number) => `$${cost.toFixed(4)}`;
@@ -154,14 +170,23 @@ export default function UsersPage() {
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button size="sm" variant="ghost" onClick={() => openGrantModal(user)}>
-                          Grant Credits
+                      <div className="flex items-center justify-end gap-1 sm:gap-2">
+                        <Button size="sm" variant="ghost" className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50" onClick={() => openCreditModal(user, 'add')}>
+                          <svg className="w-4 h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                          <span className="hidden sm:inline">Add</span>
+                        </Button>
+                        <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => openCreditModal(user, 'deduct')}>
+                          <svg className="w-4 h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                          </svg>
+                          <span className="hidden sm:inline">Deduct</span>
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
-                          className={user.status === 'active' ? 'text-red-600 hover:text-red-700 hover:bg-red-50' : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50'}
+                          className={user.status === 'active' ? 'text-orange-600 hover:text-orange-700 hover:bg-orange-50' : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'}
                           onClick={() => handleToggleStatus(user)}
                         >
                           {user.status === 'active' ? 'Suspend' : 'Activate'}
@@ -195,37 +220,49 @@ export default function UsersPage() {
         </Card>
       )}
 
-      {/* Grant Credits Modal */}
+      {/* Credit Modal - Add/Deduct */}
       <Modal
-        isOpen={showGrantModal && !!selectedUser}
-        onClose={() => setShowGrantModal(false)}
-        title={`Grant Credits to ${selectedUser?.username}`}
-        description="Add credits to this user's account."
+        isOpen={showCreditModal && !!selectedUser}
+        onClose={() => setShowCreditModal(false)}
+        title={`${creditAction === 'add' ? 'Add Credits to' : 'Deduct Credits from'} ${selectedUser?.username}`}
+        description={creditAction === 'add'
+          ? "Add credits to this user's account."
+          : `Current balance: $${(selectedUser?.credits.balance || 0).toFixed(4)}`}
       >
         <div className="space-y-4">
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+              {error}
+            </div>
+          )}
           <Input
             label="Amount ($)"
             type="number"
             step={0.01}
             min={0}
-            value={grantAmount}
-            onChange={(e) => setGrantAmount(e.target.value)}
+            max={creditAction === 'deduct' ? selectedUser?.credits.balance : undefined}
+            value={creditAmount}
+            onChange={(e) => setCreditAmount(e.target.value)}
             placeholder="10.00"
             required
           />
           <Input
             label="Description (optional)"
-            value={grantDescription}
-            onChange={(e) => setGrantDescription(e.target.value)}
-            placeholder="Bonus credits"
+            value={creditDescription}
+            onChange={(e) => setCreditDescription(e.target.value)}
+            placeholder={creditAction === 'add' ? "Bonus credits" : "Refund / Adjustment"}
           />
         </div>
         <ModalFooter>
-          <Button variant="secondary" onClick={() => setShowGrantModal(false)}>
+          <Button variant="secondary" onClick={() => setShowCreditModal(false)} disabled={submitting}>
             Cancel
           </Button>
-          <Button onClick={handleGrantCredits} disabled={!grantAmount || parseFloat(grantAmount) <= 0}>
-            Grant Credits
+          <Button
+            onClick={handleCreditAction}
+            disabled={!creditAmount || parseFloat(creditAmount) <= 0 || submitting}
+            className={creditAction === 'deduct' ? 'bg-red-600 hover:bg-red-700' : ''}
+          >
+            {submitting ? <Spinner size="sm" /> : (creditAction === 'add' ? 'Add Credits' : 'Deduct Credits')}
           </Button>
         </ModalFooter>
       </Modal>

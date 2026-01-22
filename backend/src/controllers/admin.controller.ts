@@ -189,6 +189,55 @@ export class AdminController {
     }
   }
 
+  async deductCredits(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { amount, description } = req.body;
+
+      if (!amount || typeof amount !== 'number' || amount <= 0) {
+        res.status(400).json({ error: 'Amount must be a positive number' });
+        return;
+      }
+
+      // Check if user exists
+      const user = await prisma.user.findUnique({
+        where: { id },
+        include: { credits: true }
+      });
+      if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
+
+      // Check if user has enough credits
+      const currentBalance = user.credits ? Number(user.credits.balance) : 0;
+      if (currentBalance < amount) {
+        res.status(400).json({ error: `Insufficient credits. Current balance: $${currentBalance.toFixed(4)}` });
+        return;
+      }
+
+      const transaction = await creditService.deductCreditsAdmin(
+        id,
+        amount,
+        description || `Admin credit deduction`
+      );
+
+      res.json({
+        message: 'Credits deducted successfully',
+        transaction: {
+          id: transaction.id,
+          amount: Number(transaction.amount),
+          balance_after: Number(transaction.balanceAfter),
+          description: transaction.description,
+          created_at: transaction.createdAt,
+        },
+      });
+    } catch (error) {
+      console.error('Deduct credits error:', error);
+      res.status(500).json({ error: 'Failed to deduct credits' });
+    }
+  }
+
   async updateUserStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;

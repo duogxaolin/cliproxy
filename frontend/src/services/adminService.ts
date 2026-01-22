@@ -226,6 +226,10 @@ export const adminService = {
     await api.post(`/api/admin/users/${userId}/credits`, { amount, description });
   },
 
+  async deductCredits(userId: string, amount: number, description?: string): Promise<void> {
+    await api.post(`/api/admin/users/${userId}/credits/deduct`, { amount, description });
+  },
+
   async updateUserStatus(userId: string, status: 'active' | 'suspended'): Promise<void> {
     await api.patch(`/api/admin/users/${userId}/status`, { status });
   },

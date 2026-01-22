@@ -35,6 +35,9 @@ router.get('/users/:id', (req, res) => adminController.getUser(req, res));
 // POST /api/admin/users/:id/credits - Grant credits to user
 router.post('/users/:id/credits', (req, res) => adminController.grantCredits(req, res));
 
+// POST /api/admin/users/:id/credits/deduct - Deduct credits from user
+router.post('/users/:id/credits/deduct', (req, res) => adminController.deductCredits(req, res));
+
 // PATCH /api/admin/users/:id/status - Update user status (suspend/activate)
 router.patch('/users/:id/status', (req, res) => adminController.updateUserStatus(req, res));
 
