@@ -114,39 +114,6 @@ export default function ModelsPage() {
             ))}
           </div>
         )}
-
-        {/* Usage Instructions */}
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.models.howToUse}</h2>
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">1. {t.models.getApiKey}</h3>
-                <p className="text-gray-600">
-                  {isAuthenticated ? (
-                    <Link to="/api-keys" className="text-primary-600 hover:underline">{t.models.goToApiKeys}</Link>
-                  ) : (
-                    <><Link to="/register" className="text-primary-600 hover:underline">{t.models.createAccountFirst}</Link> {t.models.andGenerateKey}</>
-                  )}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">2. {t.models.makeApiRequests}</h3>
-                <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-                  <pre className="text-sm text-gray-100">
-{`curl -X POST ${window.location.protocol}//${window.location.hostname}:4569/v1/messages \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "model": "claude-sonnet-4-20250514",
-    "messages": [{"role": "user", "content": "Hello!"}]
-  }'`}
-                  </pre>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
