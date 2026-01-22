@@ -64,9 +64,8 @@ export class ProxyService {
     let responseData: any;
     let statusCode: number;
 
-    // Detect provider type from URL path
-    const isAnthropicFormat = model.providerBaseUrl.includes('/messages');
-    const isOpenAIFormat = model.providerBaseUrl.includes('/chat/completions');
+    // Build full endpoint URL - auto-detect and append path if needed
+    const { fullUrl, isAnthropicFormat } = this.buildProviderUrl(model.providerBaseUrl);
 
     // Build headers based on provider format
     const headers: Record<string, string> = {
@@ -82,7 +81,7 @@ export class ProxyService {
     }
 
     try {
-      response = await fetch(model.providerBaseUrl, {
+      response = await fetch(fullUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify(transformedBody),
@@ -193,8 +192,8 @@ export class ProxyService {
       stream: true,
     };
 
-    // Detect provider type from URL path
-    const isAnthropicFormat = model.providerBaseUrl.includes('/messages');
+    // Build full endpoint URL - auto-detect and append path if needed
+    const { fullUrl, isAnthropicFormat } = this.buildProviderUrl(model.providerBaseUrl);
 
     // Build headers based on provider format
     const headers: Record<string, string> = {
@@ -210,7 +209,7 @@ export class ProxyService {
 
     let response: Response;
     try {
-      response = await fetch(model.providerBaseUrl, {
+      response = await fetch(fullUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify(transformedBody),
@@ -335,6 +334,34 @@ export class ProxyService {
       response.model = originalModelName;
     }
     return response;
+  }
+
+  /**
+   * Build full provider URL by auto-detecting and appending endpoint path if needed
+   * - If URL already contains /messages or /chat/completions, use as-is
+   * - If URL contains 'anthropic', append /v1/messages
+   * - Otherwise, append /v1/chat/completions (OpenAI compatible)
+   */
+  private buildProviderUrl(baseUrl: string): { fullUrl: string; isAnthropicFormat: boolean } {
+    const url = baseUrl.replace(/\/+$/, ''); // Remove trailing slashes
+
+    // Check if URL already has endpoint path
+    if (url.includes('/messages')) {
+      return { fullUrl: url, isAnthropicFormat: true };
+    }
+    if (url.includes('/chat/completions')) {
+      return { fullUrl: url, isAnthropicFormat: false };
+    }
+
+    // Auto-detect provider type from URL
+    const isAnthropicProvider = url.toLowerCase().includes('anthropic');
+
+    if (isAnthropicProvider) {
+      return { fullUrl: `${url}/v1/messages`, isAnthropicFormat: true };
+    } else {
+      // Default to OpenAI compatible format
+      return { fullUrl: `${url}/v1/chat/completions`, isAnthropicFormat: false };
+    }
   }
 }
 
