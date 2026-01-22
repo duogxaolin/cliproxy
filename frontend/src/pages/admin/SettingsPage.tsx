@@ -3,7 +3,7 @@ import { UserLayout } from '../../components/layout';
 import { Card, Button, Input, Modal, Badge, Spinner } from '../../components/ui';
 import { adminService, SystemSetting, CreateSettingInput } from '../../services/adminService';
 import { setApiBaseUrl, getApiBaseUrl, getDefaultUrls } from '../../services/api';
-import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon, Cog6ToothIcon, ServerIcon, GlobeAltIcon, LinkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon, Cog6ToothIcon, ServerIcon, GlobeAltIcon, LinkIcon, CloudArrowUpIcon } from '@heroicons/react/24/outline';
 
 type Category = 'environment' | 'connection' | 'system';
 type DataType = 'string' | 'number' | 'boolean' | 'json';
@@ -55,6 +55,16 @@ export default function SettingsPage() {
   const [cliProxyUrl, setCliProxyUrlState] = useState(getCurrentCliProxyUrl());
   const [savingUrls, setSavingUrls] = useState(false);
 
+  // Upload storage settings
+  const [uploadStorageType, setUploadStorageType] = useState<'local' | 'r2'>('local');
+  const [r2AccountId, setR2AccountId] = useState('');
+  const [r2AccessKeyId, setR2AccessKeyId] = useState('');
+  const [r2SecretAccessKey, setR2SecretAccessKey] = useState('');
+  const [r2BucketName, setR2BucketName] = useState('');
+  const [r2PublicUrl, setR2PublicUrl] = useState('');
+  const [savingUploadSettings, setSavingUploadSettings] = useState(false);
+  const [loadingUploadSettings, setLoadingUploadSettings] = useState(true);
+
   // Form state
   const [formData, setFormData] = useState<CreateSettingInput>({
     key: '',
@@ -68,6 +78,66 @@ export default function SettingsPage() {
   useEffect(() => {
     loadSettings();
   }, [activeCategory]);
+
+  // Load upload storage settings on mount
+  useEffect(() => {
+    loadUploadSettings();
+  }, []);
+
+  const loadUploadSettings = async () => {
+    setLoadingUploadSettings(true);
+    try {
+      const response = await adminService.getSettings('system');
+      const settingsMap: Record<string, string> = {};
+      response.data.forEach((s: SystemSetting) => {
+        settingsMap[s.key] = s.value;
+      });
+
+      setUploadStorageType((settingsMap['UPLOAD_STORAGE_TYPE'] as 'local' | 'r2') || 'local');
+      setR2AccountId(settingsMap['R2_ACCOUNT_ID'] || '');
+      setR2AccessKeyId(settingsMap['R2_ACCESS_KEY_ID'] || '');
+      setR2BucketName(settingsMap['R2_BUCKET_NAME'] || '');
+      setR2PublicUrl(settingsMap['R2_PUBLIC_URL'] || '');
+      // Don't load secret - it's masked
+    } catch (err) {
+      console.error('Failed to load upload settings:', err);
+    } finally {
+      setLoadingUploadSettings(false);
+    }
+  };
+
+  const handleSaveUploadSettings = async () => {
+    setSavingUploadSettings(true);
+    setError(null);
+    try {
+      const settingsToSave: CreateSettingInput[] = [
+        { key: 'UPLOAD_STORAGE_TYPE', value: uploadStorageType, category: 'system', dataType: 'string', isSecret: false, description: 'Upload storage type: local or r2' },
+      ];
+
+      if (uploadStorageType === 'r2') {
+        settingsToSave.push(
+          { key: 'R2_ACCOUNT_ID', value: r2AccountId, category: 'system', dataType: 'string', isSecret: false, description: 'Cloudflare R2 Account ID' },
+          { key: 'R2_ACCESS_KEY_ID', value: r2AccessKeyId, category: 'system', dataType: 'string', isSecret: false, description: 'Cloudflare R2 Access Key ID' },
+          { key: 'R2_BUCKET_NAME', value: r2BucketName, category: 'system', dataType: 'string', isSecret: false, description: 'Cloudflare R2 Bucket Name' },
+          { key: 'R2_PUBLIC_URL', value: r2PublicUrl, category: 'system', dataType: 'string', isSecret: false, description: 'Cloudflare R2 Public URL' },
+        );
+        if (r2SecretAccessKey) {
+          settingsToSave.push(
+            { key: 'R2_SECRET_ACCESS_KEY', value: r2SecretAccessKey, category: 'system', dataType: 'string', isSecret: true, description: 'Cloudflare R2 Secret Access Key' },
+          );
+        }
+      }
+
+      await adminService.bulkUpsertSettings(settingsToSave);
+      setSuccessMessage('Upload settings saved successfully!');
+      setTimeout(() => setSuccessMessage(null), 3000);
+      loadSettings();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to save upload settings');
+    } finally {
+      setSavingUploadSettings(false);
+    }
+  };
 
   // Save URL settings to localStorage
   const handleSaveUrlSettings = () => {
@@ -279,6 +349,114 @@ export default function SettingsPage() {
             Current API: <code className="bg-gray-100 px-1 rounded">{getApiBaseUrl()}</code>
           </span>
         </div>
+      </Card>
+
+      {/* Upload Storage Settings Card */}
+      <Card className="mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <CloudArrowUpIcon className="w-5 h-5 text-purple-600" />
+          <h2 className="text-lg font-semibold text-gray-900">Upload Storage</h2>
+          <Badge color="purple" size="sm">Server Storage</Badge>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          Configure where uploaded images are stored. Choose between local server storage or Cloudflare R2.
+        </p>
+
+        {loadingUploadSettings ? (
+          <div className="flex justify-center py-4">
+            <Spinner size="md" />
+          </div>
+        ) : (
+          <>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Storage Type</label>
+              <div className="flex gap-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="storageType"
+                    value="local"
+                    checked={uploadStorageType === 'local'}
+                    onChange={() => setUploadStorageType('local')}
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Local Server</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="storageType"
+                    value="r2"
+                    checked={uploadStorageType === 'r2'}
+                    onChange={() => setUploadStorageType('r2')}
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Cloudflare R2</span>
+                </label>
+              </div>
+            </div>
+
+            {uploadStorageType === 'r2' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Account ID</label>
+                  <input
+                    type="text"
+                    value={r2AccountId}
+                    onChange={(e) => setR2AccountId(e.target.value)}
+                    placeholder="Your Cloudflare Account ID"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bucket Name</label>
+                  <input
+                    type="text"
+                    value={r2BucketName}
+                    onChange={(e) => setR2BucketName(e.target.value)}
+                    placeholder="your-bucket-name"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Access Key ID</label>
+                  <input
+                    type="text"
+                    value={r2AccessKeyId}
+                    onChange={(e) => setR2AccessKeyId(e.target.value)}
+                    placeholder="R2 Access Key ID"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Secret Access Key</label>
+                  <input
+                    type="password"
+                    value={r2SecretAccessKey}
+                    onChange={(e) => setR2SecretAccessKey(e.target.value)}
+                    placeholder="Leave empty to keep current"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Public URL</label>
+                  <input
+                    type="url"
+                    value={r2PublicUrl}
+                    onChange={(e) => setR2PublicUrl(e.target.value)}
+                    placeholder="https://pub-xxx.r2.dev or your custom domain"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                  />
+                  <p className="mt-1 text-xs text-gray-400">The public URL where uploaded files can be accessed</p>
+                </div>
+              </div>
+            )}
+
+            <Button onClick={handleSaveUploadSettings} disabled={savingUploadSettings}>
+              {savingUploadSettings ? <Spinner size="sm" /> : 'Save Upload Settings'}
+            </Button>
+          </>
+        )}
       </Card>
 
       {/* Category Tabs */}
