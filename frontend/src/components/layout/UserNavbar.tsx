@@ -77,7 +77,11 @@ export default function UserNavbar() {
                 </div>
                 <div className="flex flex-col text-left">
                   <span className="text-sm font-medium text-gray-900">{user?.username || 'User'}</span>
-                  <span className="text-xs text-gray-500">{user?.email}</span>
+                  {user?.role === 'admin' ? (
+                    <span className="text-xs text-primary-600 font-medium">Admin</span>
+                  ) : (
+                    <span className="text-xs text-gray-500">{user?.email}</span>
+                  )}
                 </div>
                 <svg className={`w-4 h-4 text-gray-400 transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
