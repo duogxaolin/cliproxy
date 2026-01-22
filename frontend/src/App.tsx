@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import ApiKeysPage from './pages/ApiKeysPage';
 import CreditsPage from './pages/CreditsPage';
 import UsagePage from './pages/UsagePage';
+import TestApiPage from './pages/TestApiPage';
 import ModelsPage from './pages/ModelsPage';
 import GuidesPage from './pages/GuidesPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -59,6 +60,14 @@ function App() {
           element={
             <ProtectedRoute>
               <UsagePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/test-api"
+          element={
+            <ProtectedRoute>
+              <TestApiPage />
             </ProtectedRoute>
           }
         />

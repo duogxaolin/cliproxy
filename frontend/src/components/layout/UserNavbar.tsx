@@ -57,6 +57,7 @@ export default function UserNavbar() {
               <Link to="/api-keys" className={linkClass('/api-keys')}>{t.nav.apiKeys}</Link>
               <Link to="/credits" className={linkClass('/credits')}>{t.nav.credits}</Link>
               <Link to="/usage" className={linkClass('/usage')}>{t.nav.usage}</Link>
+              <Link to="/test-api" className={linkClass('/test-api')}>Test API</Link>
             </div>
           </div>
 
@@ -196,6 +197,7 @@ export default function UserNavbar() {
             <Link to="/api-keys" className={mobileLinkClass('/api-keys')} onClick={() => setMobileMenuOpen(false)}>{t.nav.apiKeys}</Link>
             <Link to="/credits" className={mobileLinkClass('/credits')} onClick={() => setMobileMenuOpen(false)}>{t.nav.credits}</Link>
             <Link to="/usage" className={mobileLinkClass('/usage')} onClick={() => setMobileMenuOpen(false)}>{t.nav.usage}</Link>
+            <Link to="/test-api" className={mobileLinkClass('/test-api')} onClick={() => setMobileMenuOpen(false)}>Test API</Link>
 
             <div className="border-t border-gray-100 my-2" />
             <Link to="/models" className={mobileLinkClass('/models')} onClick={() => setMobileMenuOpen(false)}>{t.nav.modelsAndPricing}</Link>
