@@ -6,8 +6,10 @@ import { apiKeyService, ApiKey } from '../services/apiKeyService';
 type ApiFormat = 'openai' | 'anthropic';
 
 interface PublicModel {
-  name: string;
-  display_name: string;
+  id: string;
+  displayName: string;
+  pricingInput: number;
+  pricingOutput: number;
 }
 
 export default function TestApiPage() {
@@ -46,7 +48,7 @@ export default function TestApiPage() {
       setApiKeys(keysData);
       setModels(modelsRes.data || []);
       if (modelsRes.data?.length > 0) {
-        setSelectedModel(modelsRes.data[0].name);
+        setSelectedModel(modelsRes.data[0].displayName);
       }
     } catch (err) {
       console.error('Failed to load data:', err);
@@ -228,8 +230,8 @@ export default function TestApiPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 {models.map((model) => (
-                  <option key={model.name} value={model.name}>
-                    {model.display_name || model.name}
+                  <option key={model.id} value={model.displayName}>
+                    {model.displayName}
                   </option>
                 ))}
               </select>
