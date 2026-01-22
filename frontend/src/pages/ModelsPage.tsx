@@ -93,7 +93,6 @@ export default function ModelsPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">{model.displayName}</h3>
-                    <p className="text-sm text-gray-500">{model.providerModel}</p>
                   </div>
                   <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
                     {t.models.active}
