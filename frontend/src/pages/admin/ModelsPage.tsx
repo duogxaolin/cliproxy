@@ -3,6 +3,8 @@ import { UserLayout } from '../../components/layout';
 import { Card, Button, Input, Badge, Spinner, Modal, ModalFooter, Alert } from '../../components/ui';
 import { adminService, ShadowModel, CreateModelData } from '../../services/adminService';
 
+type ProviderType = 'openai' | 'anthropic' | 'custom';
+
 export default function ModelsPage() {
   const [models, setModels] = useState<ShadowModel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,6 +23,7 @@ export default function ModelsPage() {
   // Test API state
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string; response?: string } | null>(null);
+  const [testProviderType, setTestProviderType] = useState<ProviderType>('openai');
 
   const loadModels = async () => {
     setLoading(true);
@@ -127,14 +130,34 @@ export default function ModelsPage() {
     setTestResult(null);
 
     try {
-      // Detect if Anthropic or OpenAI format
-      const isAnthropicFormat = formData.provider_base_url.includes('/messages');
+      // Build full endpoint URL based on provider type
+      let baseUrl = formData.provider_base_url.replace(/\/+$/, ''); // Remove trailing slashes
+      let fullEndpoint: string;
+
+      if (testProviderType === 'openai') {
+        // Add /v1/chat/completions if not already present
+        if (!baseUrl.includes('/chat/completions')) {
+          fullEndpoint = baseUrl + '/v1/chat/completions';
+        } else {
+          fullEndpoint = baseUrl;
+        }
+      } else if (testProviderType === 'anthropic') {
+        // Add /v1/messages if not already present
+        if (!baseUrl.includes('/messages')) {
+          fullEndpoint = baseUrl + '/v1/messages';
+        } else {
+          fullEndpoint = baseUrl;
+        }
+      } else {
+        // Custom - use as-is
+        fullEndpoint = baseUrl;
+      }
 
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
 
-      if (isAnthropicFormat) {
+      if (testProviderType === 'anthropic') {
         headers['x-api-key'] = formData.provider_token;
         headers['anthropic-version'] = '2023-06-01';
       } else {
@@ -148,7 +171,7 @@ export default function ModelsPage() {
       };
 
       const startTime = Date.now();
-      const res = await fetch(formData.provider_base_url, {
+      const res = await fetch(fullEndpoint, {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
@@ -168,13 +191,13 @@ export default function ModelsPage() {
 
         setTestResult({
           success: true,
-          message: `✅ Test successful! Response time: ${responseTime}ms`,
+          message: `✅ Test successful! Response time: ${responseTime}ms\nEndpoint: ${fullEndpoint}`,
           response: content || JSON.stringify(data, null, 2),
         });
       } else {
         setTestResult({
           success: false,
-          message: `❌ Error ${res.status}: ${data.error?.message || data.error || res.statusText}`,
+          message: `❌ Error ${res.status}: ${data.error?.message || data.error || res.statusText}\nEndpoint: ${fullEndpoint}`,
           response: JSON.stringify(data, null, 2),
         });
       }
@@ -347,6 +370,23 @@ export default function ModelsPage() {
           <div className="border-t pt-4 mt-4">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-gray-700">Test API Connection</span>
+            </div>
+
+            {/* Provider Type Selection */}
+            <div className="flex items-center gap-2 mb-3">
+              <label className="text-sm text-gray-600">Provider Type:</label>
+              <select
+                value={testProviderType}
+                onChange={(e) => setTestProviderType(e.target.value as ProviderType)}
+                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              >
+                <option value="openai">OpenAI Compatible (+/v1/chat/completions)</option>
+                <option value="anthropic">Anthropic (+/v1/messages)</option>
+                <option value="custom">Custom (use URL as-is)</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
               <Button
                 size="sm"
                 variant="secondary"
@@ -362,6 +402,11 @@ export default function ModelsPage() {
                   '🧪 Test API'
                 )}
               </Button>
+              <span className="text-xs text-gray-500">
+                {testProviderType === 'openai' && `→ ${formData.provider_base_url?.replace(/\/+$/, '')}/v1/chat/completions`}
+                {testProviderType === 'anthropic' && `→ ${formData.provider_base_url?.replace(/\/+$/, '')}/v1/messages`}
+                {testProviderType === 'custom' && `→ ${formData.provider_base_url}`}
+              </span>
             </div>
 
             {testResult && (
@@ -370,7 +415,7 @@ export default function ModelsPage() {
                 className="mt-3"
                 onClose={() => setTestResult(null)}
               >
-                <p className="font-medium">{testResult.message}</p>
+                <p className="font-medium whitespace-pre-line">{testResult.message}</p>
                 {testResult.response && (
                   <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto max-h-32">
                     {testResult.response}
