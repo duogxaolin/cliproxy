@@ -39,7 +39,9 @@ export default function ModelsPage() {
 
   const formatPrice = (price: number | string) => {
     const numPrice = typeof price === 'string' ? parseFloat(price) : (price ?? 0);
-    return `$${(numPrice || 0).toFixed(6)}`;
+    // Remove trailing zeros
+    const formatted = (numPrice || 0).toFixed(6).replace(/\.?0+$/, '');
+    return `$${formatted}`;
   };
 
   return (

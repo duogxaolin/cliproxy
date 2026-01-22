@@ -8,13 +8,12 @@ const router = Router();
 router.get('/models', async (req: Request, res: Response) => {
   try {
     const models = await shadowModelService.getActiveModels();
-    // Return only public info (no provider token)
+    // Return only public info (no provider token, no provider model)
     const publicModels = models.map(model => ({
       id: model.id,
       displayName: model.displayName,
-      providerModel: model.providerModel,
-      pricingInput: model.pricingInput,
-      pricingOutput: model.pricingOutput,
+      pricingInput: parseFloat(String(model.pricingInput)),
+      pricingOutput: parseFloat(String(model.pricingOutput)),
       isActive: model.isActive,
     }));
     res.json({ data: publicModels });
