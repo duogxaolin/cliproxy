@@ -20,9 +20,12 @@ export default function TestApiPage() {
   // Form state
   const [customApiKey, setCustomApiKey] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
+  const [customModel, setCustomModel] = useState('');
   const [apiFormat, setApiFormat] = useState<ApiFormat>('openai');
   const [message, setMessage] = useState('Hello! Can you tell me a short joke?');
   const [maxTokens, setMaxTokens] = useState('256');
+  const [useCustomUrl, setUseCustomUrl] = useState(false);
+  const [customUrl, setCustomUrl] = useState('');
   
   // Response state
   const [response, setResponse] = useState<string | null>(null);
@@ -61,12 +64,17 @@ export default function TestApiPage() {
       setError('Please enter your API key');
       return;
     }
-    if (!selectedModel) {
-      setError('Please select a model');
+    const modelToUse = useCustomUrl ? customModel : selectedModel;
+    if (!modelToUse) {
+      setError('Please select or enter a model');
       return;
     }
     if (!message.trim()) {
       setError('Please enter a message');
+      return;
+    }
+    if (useCustomUrl && !customUrl.trim()) {
+      setError('Please enter a custom URL');
       return;
     }
 
@@ -76,9 +84,14 @@ export default function TestApiPage() {
     const startTime = Date.now();
 
     try {
-      const endpoint = apiFormat === 'openai'
-        ? `${baseUrl}/api/v1/chat/completions`
-        : `${baseUrl}/api/v1/messages`;
+      let endpoint: string;
+      if (useCustomUrl) {
+        endpoint = customUrl;
+      } else {
+        endpoint = apiFormat === 'openai'
+          ? `${baseUrl}/api/v1/chat/completions`
+          : `${baseUrl}/api/v1/messages`;
+      }
 
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -93,12 +106,12 @@ export default function TestApiPage() {
 
       const body = apiFormat === 'openai'
         ? {
-            model: selectedModel,
+            model: modelToUse,
             messages: [{ role: 'user', content: message }],
             max_tokens: parseInt(maxTokens) || 256,
           }
         : {
-            model: selectedModel,
+            model: modelToUse,
             messages: [{ role: 'user', content: message }],
             max_tokens: parseInt(maxTokens) || 256,
           };
@@ -195,7 +208,7 @@ export default function TestApiPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">API Key</label>
               <Input
-                placeholder="Paste your full API key here (sk-...)"
+                placeholder="Paste your full API key here (sk-... or amp_...)"
                 value={customApiKey}
                 onChange={(e) => setCustomApiKey(e.target.value)}
                 type="password"
@@ -203,27 +216,64 @@ export default function TestApiPage() {
               <p className="mt-1 text-xs text-gray-500">
                 {apiFormat === 'openai' ? 'Uses Authorization: Bearer header' : 'Uses x-api-key header'}
               </p>
-              {apiKeys.length > 0 && (
+              {apiKeys.length > 0 && !useCustomUrl && (
                 <p className="mt-2 text-xs text-blue-600">
                   💡 Your keys: {apiKeys.map(k => `${k.name} (${k.key_prefix}...)`).join(', ')}
                 </p>
               )}
             </div>
 
+            {/* Custom URL Toggle */}
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <input
+                type="checkbox"
+                id="useCustomUrl"
+                checked={useCustomUrl}
+                onChange={(e) => setUseCustomUrl(e.target.checked)}
+                className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+              />
+              <label htmlFor="useCustomUrl" className="text-sm font-medium text-gray-700">
+                Use Custom URL (for external APIs like OpenAI, Anthropic directly)
+              </label>
+            </div>
+
+            {/* Custom URL Input */}
+            {useCustomUrl && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Custom API URL</label>
+                <Input
+                  placeholder="https://api.openai.com/v1/chat/completions"
+                  value={customUrl}
+                  onChange={(e) => setCustomUrl(e.target.value)}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  OpenAI: https://api.openai.com/v1/chat/completions | Anthropic: https://api.anthropic.com/v1/messages
+                </p>
+              </div>
+            )}
+
             {/* Model Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Model</label>
-              <select
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              >
-                {models.map((model) => (
-                  <option key={model.id} value={model.displayName}>
-                    {model.displayName}
-                  </option>
-                ))}
-              </select>
+              {useCustomUrl ? (
+                <Input
+                  placeholder="claude-sonnet-4-20250514 or gpt-4-turbo"
+                  value={customModel}
+                  onChange={(e) => setCustomModel(e.target.value)}
+                />
+              ) : (
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+                  {models.map((model) => (
+                    <option key={model.id} value={model.displayName}>
+                      {model.displayName}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             {/* Max Tokens */}
