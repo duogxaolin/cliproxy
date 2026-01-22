@@ -18,7 +18,6 @@ export default function TestApiPage() {
   const [loading, setLoading] = useState(true);
   
   // Form state
-  const [selectedKeyId, setSelectedKeyId] = useState('');
   const [customApiKey, setCustomApiKey] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
   const [apiFormat, setApiFormat] = useState<ApiFormat>('openai');
@@ -58,9 +57,8 @@ export default function TestApiPage() {
   };
 
   const handleTest = async () => {
-    const apiKey = customApiKey || '';
-    if (!apiKey && !selectedKeyId) {
-      setError('Please enter an API key or select one from your keys');
+    if (!customApiKey.trim()) {
+      setError('Please enter your API key');
       return;
     }
     if (!selectedModel) {
@@ -78,7 +76,7 @@ export default function TestApiPage() {
     const startTime = Date.now();
 
     try {
-      const endpoint = apiFormat === 'openai' 
+      const endpoint = apiFormat === 'openai'
         ? `${baseUrl}/api/v1/chat/completions`
         : `${baseUrl}/api/v1/messages`;
 
@@ -87,13 +85,13 @@ export default function TestApiPage() {
       };
 
       if (apiFormat === 'openai') {
-        headers['Authorization'] = `Bearer ${apiKey}`;
+        headers['Authorization'] = `Bearer ${customApiKey}`;
       } else {
-        headers['x-api-key'] = apiKey;
+        headers['x-api-key'] = customApiKey;
         headers['anthropic-version'] = '2023-06-01';
       }
 
-      const body = apiFormat === 'openai' 
+      const body = apiFormat === 'openai'
         ? {
             model: selectedModel,
             messages: [{ role: 'user', content: message }],
@@ -193,32 +191,23 @@ export default function TestApiPage() {
               </div>
             </div>
 
-            {/* API Key Selection */}
+            {/* API Key Input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">API Key</label>
-              {apiKeys.length > 0 && (
-                <select
-                  value={selectedKeyId}
-                  onChange={(e) => { setSelectedKeyId(e.target.value); setCustomApiKey(''); }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 mb-2"
-                >
-                  <option value="">-- Select from your keys --</option>
-                  {apiKeys.map((key) => (
-                    <option key={key.id} value={key.id}>
-                      {key.name} ({key.key_prefix}...)
-                    </option>
-                  ))}
-                </select>
-              )}
               <Input
-                placeholder="Or paste your API key here (sk-...)"
+                placeholder="Paste your full API key here (sk-...)"
                 value={customApiKey}
-                onChange={(e) => { setCustomApiKey(e.target.value); setSelectedKeyId(''); }}
+                onChange={(e) => setCustomApiKey(e.target.value)}
                 type="password"
               />
               <p className="mt-1 text-xs text-gray-500">
                 {apiFormat === 'openai' ? 'Uses Authorization: Bearer header' : 'Uses x-api-key header'}
               </p>
+              {apiKeys.length > 0 && (
+                <p className="mt-2 text-xs text-blue-600">
+                  💡 Your keys: {apiKeys.map(k => `${k.name} (${k.key_prefix}...)`).join(', ')}
+                </p>
+              )}
             </div>
 
             {/* Model Selection */}
