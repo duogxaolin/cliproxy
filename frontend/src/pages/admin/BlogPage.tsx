@@ -37,7 +37,9 @@ export default function BlogPage() {
   const [formData, setFormData] = useState<PostFormData>({
     title: '', slug: '', excerpt: '', content: '', coverImage: '', isPublished: false,
   });
+  const [uploading, setUploading] = useState(false);
   const editorRef = useRef<unknown>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const baseUrl = import.meta.env.VITE_API_URL || 
     (window.location.hostname === 'localhost' ? 'http://localhost:3000' : `${window.location.protocol}//${window.location.hostname}:4567`);
@@ -89,6 +91,56 @@ export default function BlogPage() {
       title,
       slug: prev.slug || generateSlug(title),
     }));
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+
+        const response = await fetch(`${baseUrl}/api/upload/image`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ image: base64, filename: file.name }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setFormData(prev => ({ ...prev, coverImage: data.url }));
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Failed to upload image');
+        }
+        setUploading(false);
+      };
+      reader.onerror = () => {
+        alert('Failed to read file');
+        setUploading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('Failed to upload image');
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -220,12 +272,43 @@ export default function BlogPage() {
             onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
             placeholder="Brief description for listing"
           />
-          <Input
-            label="Cover Image URL"
-            value={formData.coverImage}
-            onChange={(e) => setFormData(prev => ({ ...prev, coverImage: e.target.value }))}
-            placeholder="https://example.com/image.jpg"
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Cover Image</label>
+            <div className="flex gap-2 items-start">
+              <div className="flex-1">
+                <Input
+                  value={formData.coverImage}
+                  onChange={(e) => setFormData(prev => ({ ...prev, coverImage: e.target.value }))}
+                  placeholder="https://example.com/image.jpg or upload"
+                />
+              </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? 'Uploading...' : 'Upload'}
+              </Button>
+            </div>
+            {formData.coverImage && (
+              <div className="mt-2">
+                <img
+                  src={formData.coverImage}
+                  alt="Cover preview"
+                  className="max-h-32 rounded border border-gray-200"
+                  onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                />
+              </div>
+            )}
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
             <Editor

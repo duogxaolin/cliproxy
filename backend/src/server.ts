@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import path from 'path';
 import prisma from './utils/prisma';
 import authRoutes from './routes/auth.routes';
 import adminRoutes from './routes/admin.routes';
@@ -9,6 +10,7 @@ import proxyRoutes from './routes/proxy.routes';
 import apiKeyRoutes from './routes/apiKey.routes';
 import userRoutes from './routes/user.routes';
 import publicRoutes from './routes/public.routes';
+import uploadRoutes from './routes/upload.routes';
 
 dotenv.config();
 
@@ -21,7 +23,10 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Health check endpoint with database status
 app.get('/health', async (req, res) => {
@@ -74,6 +79,9 @@ app.use('/api/api-keys', apiKeyRoutes);
 
 // Admin routes
 app.use('/api/admin', adminRoutes);
+
+// Upload routes
+app.use('/api/upload', uploadRoutes);
 
 // Proxy routes (API v1)
 app.use('/api/v1', proxyRoutes);
