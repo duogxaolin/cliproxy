@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { UserLayout } from '../../components/layout';
-import { Card, Button, Input, Badge, Spinner, Modal, ModalFooter } from '../../components/ui';
+import { Card, Button, Input, Badge, Spinner, Modal, ModalFooter, Alert } from '../../components/ui';
 import { adminService, ShadowModel, CreateModelData } from '../../services/adminService';
 
 export default function ModelsPage() {
@@ -17,6 +17,10 @@ export default function ModelsPage() {
     pricing_output: 0,
     is_active: true,
   });
+
+  // Test API state
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string; response?: string } | null>(null);
 
   const loadModels = async () => {
     setLoading(true);
@@ -49,6 +53,7 @@ export default function ModelsPage() {
 
   const openCreateModal = () => {
     resetForm();
+    setTestResult(null);
     setShowModal(true);
   };
 
@@ -63,6 +68,7 @@ export default function ModelsPage() {
       pricing_output: model.pricing_output,
       is_active: model.is_active,
     });
+    setTestResult(null);
     setShowModal(true);
   };
 
@@ -101,6 +107,84 @@ export default function ModelsPage() {
       loadModels();
     } catch (err) {
       console.error('Failed to toggle model status:', err);
+    }
+  };
+
+  const handleTestApi = async () => {
+    if (!formData.provider_base_url || !formData.provider_model) {
+      setTestResult({ success: false, message: 'Please fill in Provider Base URL and Provider Model' });
+      return;
+    }
+
+    // For editing, we need the token - either new one or existing
+    const tokenToUse = formData.provider_token || (editingModel ? '__USE_EXISTING__' : '');
+    if (!tokenToUse) {
+      setTestResult({ success: false, message: 'Please enter Provider Token' });
+      return;
+    }
+
+    setTesting(true);
+    setTestResult(null);
+
+    try {
+      // Detect if Anthropic or OpenAI format
+      const isAnthropicFormat = formData.provider_base_url.includes('/messages');
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if (isAnthropicFormat) {
+        headers['x-api-key'] = formData.provider_token;
+        headers['anthropic-version'] = '2023-06-01';
+      } else {
+        headers['Authorization'] = `Bearer ${formData.provider_token}`;
+      }
+
+      const body = {
+        model: formData.provider_model,
+        messages: [{ role: 'user', content: 'Say "Hello, test successful!" in exactly those words.' }],
+        max_tokens: 50,
+      };
+
+      const startTime = Date.now();
+      const res = await fetch(formData.provider_base_url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+      });
+
+      const responseTime = Date.now() - startTime;
+      const data = await res.json();
+
+      if (res.ok) {
+        // Extract response content
+        let content = '';
+        if (data.choices?.[0]?.message?.content) {
+          content = data.choices[0].message.content; // OpenAI format
+        } else if (data.content?.[0]?.text) {
+          content = data.content[0].text; // Anthropic format
+        }
+
+        setTestResult({
+          success: true,
+          message: `✅ Test successful! Response time: ${responseTime}ms`,
+          response: content || JSON.stringify(data, null, 2),
+        });
+      } else {
+        setTestResult({
+          success: false,
+          message: `❌ Error ${res.status}: ${data.error?.message || data.error || res.statusText}`,
+          response: JSON.stringify(data, null, 2),
+        });
+      }
+    } catch (err) {
+      setTestResult({
+        success: false,
+        message: `❌ Connection failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      });
+    } finally {
+      setTesting(false);
     }
   };
 
@@ -258,9 +342,46 @@ export default function ModelsPage() {
             />
             <label htmlFor="is_active" className="ml-2 text-sm text-gray-700">Active</label>
           </div>
+
+          {/* Test API Section */}
+          <div className="border-t pt-4 mt-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-gray-700">Test API Connection</span>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleTestApi}
+                disabled={testing || !formData.provider_base_url || !formData.provider_model || (!editingModel && !formData.provider_token)}
+              >
+                {testing ? (
+                  <>
+                    <Spinner size="sm" className="mr-2" />
+                    Testing...
+                  </>
+                ) : (
+                  '🧪 Test API'
+                )}
+              </Button>
+            </div>
+
+            {testResult && (
+              <Alert
+                variant={testResult.success ? 'success' : 'error'}
+                className="mt-3"
+                onClose={() => setTestResult(null)}
+              >
+                <p className="font-medium">{testResult.message}</p>
+                {testResult.response && (
+                  <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto max-h-32">
+                    {testResult.response}
+                  </pre>
+                )}
+              </Alert>
+            )}
+          </div>
         </div>
         <ModalFooter>
-          <Button variant="secondary" onClick={() => { setShowModal(false); resetForm(); }}>
+          <Button variant="secondary" onClick={() => { setShowModal(false); resetForm(); setTestResult(null); }}>
             Cancel
           </Button>
           <Button
