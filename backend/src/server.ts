@@ -11,6 +11,7 @@ import apiKeyRoutes from './routes/apiKey.routes';
 import userRoutes from './routes/user.routes';
 import publicRoutes from './routes/public.routes';
 import uploadRoutes from './routes/upload.routes';
+import translationRoutes from './routes/translation.routes';
 
 dotenv.config();
 
@@ -82,6 +83,9 @@ app.use('/api/admin', adminRoutes);
 
 // Upload routes
 app.use('/api/upload', uploadRoutes);
+
+// Translation routes
+app.use('/api/translations', translationRoutes);
 
 // Proxy routes (API v1)
 app.use('/api/v1', proxyRoutes);

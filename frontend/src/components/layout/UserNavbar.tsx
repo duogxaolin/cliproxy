@@ -153,6 +153,12 @@ export default function UserNavbar() {
                         </svg>
                         {t.nav.settings}
                       </Link>
+                      <Link to="/admin/language" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setUserDropdownOpen(false)}>
+                        <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                        </svg>
+                        Language
+                      </Link>
                     </div>
                   )}
 
@@ -205,6 +211,7 @@ export default function UserNavbar() {
                 <Link to="/admin/cliproxy" className={mobileLinkClass('/admin/cliproxy')} onClick={() => setMobileMenuOpen(false)}>{t.nav.cliProxy}</Link>
                 <Link to="/admin/blog" className={mobileLinkClass('/admin/blog')} onClick={() => setMobileMenuOpen(false)}>{t.nav.blog}</Link>
                 <Link to="/admin/settings" className={mobileLinkClass('/admin/settings')} onClick={() => setMobileMenuOpen(false)}>{t.nav.settings}</Link>
+                <Link to="/admin/language" className={mobileLinkClass('/admin/language')} onClick={() => setMobileMenuOpen(false)}>Language</Link>
               </>
             )}
 

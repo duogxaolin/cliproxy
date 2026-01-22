@@ -14,6 +14,7 @@ import AdminModelsPage from './pages/admin/ModelsPage';
 import CliProxyPage from './pages/admin/CliProxyPage';
 import SettingsPage from './pages/admin/SettingsPage';
 import BlogPage from './pages/admin/BlogPage';
+import LanguagePage from './pages/admin/LanguagePage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -108,6 +109,14 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <BlogPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/language"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <LanguagePage />
             </ProtectedRoute>
           }
         />
